@@ -13,6 +13,7 @@ class Configuracion():
         self.currentProfile = os.path.join(self.RUTA_CONFIG, "config_Optimizador.json")
         self.destinyPath = ""
         self.actualConfig = {}
+        self.folderStructure = []
 
         if not os.path.exists(self.RUTA_CONFIG):
             os.makedirs(self.RUTA_CONFIG)
@@ -23,6 +24,12 @@ class Configuracion():
     def setDestinyPath(self, path):
         self.destinyPath = path
         print(self.destinyPath)
+    
+    def addFolderToStructure(self, folderPath):
+        if folderPath not in self.folderStructure:
+            self.folderStructure.append(folderPath)
+            return True
+        return False
 
     def organizarCarpetas(self):
         carpetas = []
