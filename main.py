@@ -44,6 +44,13 @@ class Configuracion():
             if not os.path.exists(os.path.join(self.destinyPath, carpeta)):
                 os.makedirs(os.path.join(self.destinyPath, carpeta))
                 
+    def getProfiles(self):
+        perfiles = []
+        for file in os.listdir(self.RUTA_CONFIG):
+            if file.startswith("config_") and file.endswith(".json"):
+                perfiles.append(file)
+        return perfiles
+                
                 
 if __name__ == "__main__":
     config = Configuracion()
