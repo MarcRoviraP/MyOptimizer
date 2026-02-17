@@ -51,6 +51,10 @@ class Configuracion():
                 perfiles.append(file)
         return perfiles
                 
+    def viewProfile(self, perfil):
+        with open(os.path.join(self.RUTA_CONFIG, perfil), "r") as file:
+            config = json.load(file)
+            return config
                 
 if __name__ == "__main__":
     config = Configuracion()
