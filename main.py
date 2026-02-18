@@ -34,6 +34,12 @@ class Configuracion:
             return True
         return False
 
+    def removeFolderFromStructure(self, folderPath):
+        if folderPath in self.folderStructure:
+            self.folderStructure.remove(folderPath)
+            return True
+        return False
+
     def setPerfil(self, perfil):
         self.currentProfile = os.path.join(self.RUTA_CONFIG, perfil)
         print(self.currentProfile)
@@ -51,32 +57,38 @@ class Configuracion:
             return config
 
     def getStructureFolder(self):
-
+        from concurrent.futures import ThreadPoolExecutor
+        import threading
+    
         with open(self.currentProfile, "r") as file:
             self.actualConfig = json.load(file)
-
+    
         mapa_extensiones = {
             ext: clave
             for clave, extensiones in self.actualConfig.items()
             for ext in extensiones
         }
-
-        finalFolder = defaultdict(list)  # ← definido antes
-
+    
+        finalFolder = defaultdict(list)
+        lock = threading.Lock()
+    
         def tarea(ruta):
             ruta = Path(ruta)
-
+    
             for f in ruta.iterdir():
                 if f.is_file():
                     extension = f.suffix.lower().lstrip(".")
                     categoria = mapa_extensiones.get(extension)
                     if categoria:
-                        finalFolder[categoria].append(f)  # ← modifica el de afuera
-
-        tarea(self.folderStructure[0])
-
-        for clave in finalFolder:
+                        with lock:  # ← protege el append compartido
+                            finalFolder[categoria].append(f)
+    
+        with ThreadPoolExecutor() as executor:
+            executor.map(tarea, self.folderStructure)  # ← un hilo por ruta
+    
+    
+        return finalFolder
+        '''for clave in finalFolder:
             print(clave)
-            
-            for valor in finalFolder.get(clave):
-                print(f"        {valor}")
+            for valor in finalFolder[clave]:
+                print(f"        {valor}")'''

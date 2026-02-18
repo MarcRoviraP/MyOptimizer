@@ -14,10 +14,10 @@ def main(page: ft.Page):
     page.title = nombreAPP
 
     # COLORS
-    
+
     BACKGROUND_COLOR = "#1A202E"
     BACKGROUND_COLOR_TERMINAL = "#0D121C"
-    
+
     config = Configuracion()
     destinyRef = ft.Ref[ft.Text]()
     foldersRef = ft.Ref[ft.GridView]()
@@ -186,36 +186,49 @@ def main(page: ft.Page):
         )
 
     def uiCustomFolderCard(carpeta):
+        def delete_folder(e):
+            if config.removeFolderFromStructure(carpeta):
+                # Buscamos el control en la lista y lo removemos
+                for control in foldersRef.current.controls[:]:
+                    if getattr(control, "data", None) == carpeta:
+                        foldersRef.current.controls.remove(control)
+                        break
+                page.update()
+
         return ft.Card(
+            data=carpeta,
             elevation=2,
             bgcolor="#3000FF40",
             shape=ft.RoundedRectangleBorder(radius=10),
-            content=ft.Container(
-                padding=ft.padding.symmetric(horizontal=12, vertical=6),
-                content=ft.Column(
-                    spacing=8,
-                    alignment=ft.MainAxisAlignment.CENTER,
-                    controls=[
-                        ft.Icon(
-                            ft.Icons.FOLDER,
-                            color=ft.Colors.YELLOW,
-                            size=20,
-                        ),
-                        ft.Text(
-                            carpeta.split("/")[-1],
-                            max_lines=3,
-                            overflow=ft.TextOverflow.ELLIPSIS,
-                            color=ft.Colors.WHITE,
-                            size=14,
-                            weight=ft.FontWeight.BOLD,
-                        ),
-                    ],
+            content=ft.GestureDetector(
+                on_double_tap=delete_folder,
+                content=ft.Container(
+                    padding=ft.padding.symmetric(horizontal=12, vertical=6),
+                    content=ft.Column(
+                        spacing=8,
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        controls=[
+                            ft.Icon(
+                                ft.Icons.FOLDER,
+                                color=ft.Colors.YELLOW,
+                                size=20,
+                            ),
+                            ft.Text(
+                                carpeta.split("/")[-1],
+                                max_lines=3,
+                                overflow=ft.TextOverflow.ELLIPSIS,
+                                color=ft.Colors.WHITE,
+                                size=14,
+                                weight=ft.FontWeight.BOLD,
+                            ),
+                        ],
+                    ),
                 ),
             ),
         )
 
     def añadirCarpeta():
-        selectedDirectory = seleccionar_carpeta()
+        selectedDirectory=seleccionar_carpeta()
         if selectedDirectory:
             if config.addFolderToStructure(selectedDirectory):
                 foldersRef.current.controls.append(
@@ -224,14 +237,14 @@ def main(page: ft.Page):
                 foldersRef.current.update()
 
     def folderOrganizerUI():
-        listaCarpetas = config.folderStructure
+        listaCarpetas=config.folderStructure
 
         # Crear las tarjetas dinámicas de las carpetas
-        carpeta_cards = [uiCustomFolderCard(
+        carpeta_cards=[uiCustomFolderCard(
             carpeta) for carpeta in listaCarpetas]
 
         # Tarjeta fija para "Agregar carpeta"
-        agregar_card = ft.Card(
+        agregar_card=ft.Card(
             elevation=2,
             bgcolor="#0000FF40",
             shape=ft.RoundedRectangleBorder(
@@ -267,7 +280,7 @@ def main(page: ft.Page):
             ),
         )
 
-        todas_las_cards = carpeta_cards + [agregar_card]
+        todas_las_cards=carpeta_cards + [agregar_card]
 
         # GridView responsive
         return ft.Container(
@@ -287,29 +300,29 @@ def main(page: ft.Page):
 
     def onPerfilClick(e, perfil):
         nonlocal profileSelected
-        profileSelected = perfil
+        profileSelected=perfil
         config.setPerfil(perfil)
         print(f"✨ Perfil seleccionado: {perfil}")
 
         # Animación suave al seleccionar
         for control in profilesRef.current.controls[1].controls:
             if isinstance(control, ft.Container):
-                tile = control.content
-                is_selected = tile.title.value == perfil.replace("config_", "").replace(
+                tile=control.content
+                is_selected=tile.title.value == perfil.replace("config_", "").replace(
                     ".json", ""
                 )
 
                 # Efecto visual mejorado
-                control.bgcolor = (
+                control.bgcolor=(
                     ft.Colors.with_opacity(0.15, ft.Colors.BLUE)
                     if is_selected
                     else None
                 )
-                control.border = (
+                control.border=(
                     ft.border.all(
                         2, ft.Colors.BLUE_400) if is_selected else None
                 )
-                control.shadow = (
+                control.shadow=(
                     ft.BoxShadow(
                         spread_radius=1,
                         blur_radius=8,
@@ -324,22 +337,21 @@ def main(page: ft.Page):
 
         # Actualizar vista previa al seleccionar
         tooglePreviewView(None, perfil, False)
-        config.getStructureFolder()
 
     def dialogSeguroEliminarPerfil(perfil):
-        nombre_perfil = perfil.replace("config_", "").replace(".json", "")
+        nombre_perfil=perfil.replace("config_", "").replace(".json", "")
         print(f"⚠️ Confirmar eliminación del perfil: {nombre_perfil}")
 
         def eliminarPerfilConfirmado(e):
-            dlg.open = False
+            dlg.open=False
             page.update()
             onDeletePerfil(e, perfil)
 
         def cerrar_dialog(e):
-            dlg.open = False
+            dlg.open=False
             page.update()
 
-        dlg = ft.AlertDialog(
+        dlg=ft.AlertDialog(
             modal=True,
             title=ft.Row(
                 controls=[
@@ -395,14 +407,14 @@ def main(page: ft.Page):
         )
 
         page.overlay.append(dlg)  # ✅ Agregar al overlay
-        dlg.open = True  # ✅ Abrir
+        dlg.open=True  # ✅ Abrir
         page.update()  # ✅ Actualizar
 
     def onDeletePerfil(e, perfil):
         print(f"🗑️ Eliminando perfil: {perfil}")
         os.remove(os.path.join(config.RUTA_CONFIG, perfil))
         # Eliminar de la UI
-        profilesRef.current.controls[1].controls = [
+        profilesRef.current.controls[1].controls=[
             c
             for c in profilesRef.current.controls[1].controls
             if not (
@@ -411,16 +423,16 @@ def main(page: ft.Page):
                 == perfil.replace("config_", "").replace(".json", "")
             )
         ]
-        contadorPerfilesRef.current.value = str(
+        contadorPerfilesRef.current.value=str(
             int(contadorPerfilesRef.current.value) - 1
         )
         contadorPerfilesRef.current.update()
         profilesRef.current.update()
 
     def viewEditarPerfil(perfil):
-        ACCENT = "#4C8BF5"
-        ACCENT_LIGHT = "#1A2A4A"
-        ICON_POOL = [
+        ACCENT="#4C8BF5"
+        ACCENT_LIGHT="#1A2A4A"
+        ICON_POOL=[
             ft.Icons.PHOTO_OUTLINED, ft.Icons.DRAW_OUTLINED,
             ft.Icons.PICTURE_AS_PDF_OUTLINED, ft.Icons.DESCRIPTION_OUTLINED,
             ft.Icons.TABLE_CHART_OUTLINED, ft.Icons.SLIDESHOW_OUTLINED,
@@ -433,17 +445,17 @@ def main(page: ft.Page):
             ft.Icons.ACCESS_TIME, ft.Icons.LINK, ft.Icons.FOLDER_OUTLINED,
         ]
 
-        nombre = perfil.replace("config_", "").replace(".json", "")
-        perfilData = config.viewProfile(perfil)
-        ruta_json = os.path.join(config.RUTA_CONFIG, perfil)
+        nombre=perfil.replace("config_", "").replace(".json", "")
+        perfilData=config.viewProfile(perfil)
+        ruta_json=os.path.join(config.RUTA_CONFIG, perfil)
 
-        cat_refs = {}
-        exp_state = {}
-        tree_col = ft.Column(spacing=0, scroll="auto")
-        status = ft.Text("", size=11, color="#8B9EAF", italic=True)
+        cat_refs={}
+        exp_state={}
+        tree_col=ft.Column(spacing=0, scroll="auto")
+        status=ft.Text("", size=11, color="#8B9EAF", italic=True)
 
         def set_status(msg):
-            status.value = msg
+            status.value=msg
             status.update()
 
         def icon_for(i):
@@ -480,11 +492,11 @@ def main(page: ft.Page):
         # ── Actualización in-place (NO reconstruye el tile) ──
 
         def update_cat_ui(cat):
-            ref = cat_refs.get(cat)
+            ref=cat_refs.get(cat)
             if not ref:
                 return
-            exts = perfilData.get(cat, [])
-            row = ref["ext_row"]
+            exts=perfilData.get(cat, [])
+            row=ref["ext_row"]
             row.controls.clear()
             if exts:
                 for e in sorted(exts):
@@ -495,20 +507,20 @@ def main(page: ft.Page):
                             italic=True, color="#556677")
                 )
             row.update()
-            ref["badge"].value = str(len(exts))
+            ref["badge"].value=str(len(exts))
             ref["badge"].update()
 
         # ── Acciones ──
 
         def add_ext(cat, val, inp):
-            ext = val.strip().lower().lstrip(".")
+            ext=val.strip().lower().lstrip(".")
             if not ext:
                 return
             if ext in perfilData[cat]:
                 set_status(f"⚠ .{ext} ya existe en {cat.replace('_', ' ')}")
                 return
             perfilData[cat].append(ext)
-            inp.value = ""
+            inp.value=""
             inp.update()
             update_cat_ui(cat)
             set_status(f"+ .{ext} → {cat.replace('_', ' ')}")
@@ -520,12 +532,12 @@ def main(page: ft.Page):
             set_status(f"− .{ext} de {cat.replace('_', ' ')}")
 
         def on_drop(e, cat_dest):
-            src = page.get_control(e.src_id)
-            data = src.data
+            src=page.get_control(e.src_id)
+            data=src.data
             if isinstance(data, str):
-                data = json.loads(data)
-            ext = data["ext"]
-            cat_src = data["from"]
+                data=json.loads(data)
+            ext=data["ext"]
+            cat_src=data["from"]
             if cat_src == cat_dest:
                 return
             if ext in perfilData[cat_src]:
@@ -546,27 +558,27 @@ def main(page: ft.Page):
             set_status(f"✕ {cat.replace('_', ' ')} eliminada")
 
         def create_cat(e):
-            n = new_input.value.strip()
+            n=new_input.value.strip()
             if not n:
                 return
-            key = n.replace(" ", "_")
+            key=n.replace(" ", "_")
             if key in perfilData:
                 set_status(f"⚠ '{n}' ya existe")
                 return
-            perfilData[key] = []
-            exp_state[key] = True
-            new_input.value = ""
+            perfilData[key]=[]
+            exp_state[key]=True
+            new_input.value=""
             new_input.update()
             rebuild()
             set_status(f"+ {n}")
 
         def save(e):
             try:
-                contenido = json.dumps(
+                contenido=json.dumps(
                     perfilData, indent=2, ensure_ascii=False)
                 with open(ruta_json, "w", encoding="utf-8") as f:
                     f.write(contenido)
-                local = os.path.join(os.path.dirname(
+                local=os.path.join(os.path.dirname(
                     os.path.abspath(__file__)), perfil)
                 if os.path.exists(local):
                     with open(local, "w", encoding="utf-8") as f:
@@ -586,7 +598,7 @@ def main(page: ft.Page):
         # ── Crear tile de categoría ──
 
         def make_tile(cat, exts, idx):
-            ext_row = ft.Row(
+            ext_row=ft.Row(
                 controls=(
                     [make_chip(e, cat) for e in sorted(exts)]
                     if exts else
@@ -596,12 +608,12 @@ def main(page: ft.Page):
                 wrap=True, spacing=4, run_spacing=4,
                 alignment=ft.MainAxisAlignment.END,
             )
-            badge_txt = ft.Text(str(len(exts)), size=10,
+            badge_txt=ft.Text(str(len(exts)), size=10,
                                 weight=ft.FontWeight.W_600, color=ACCENT)
-            badge = ft.Container(content=badge_txt, bgcolor=ACCENT_LIGHT,
+            badge=ft.Container(content=badge_txt, bgcolor=ACCENT_LIGHT,
                                  padding=ft.Padding(5, 1, 5, 1), border_radius=8)
 
-            ext_inp = ft.TextField(
+            ext_inp=ft.TextField(
                 hint_text="ext", dense=True,
                 content_padding=ft.Padding(8, 4, 8, 4),
                 text_size=11, hint_style=ft.TextStyle(size=11, color="#556677"),
@@ -612,10 +624,10 @@ def main(page: ft.Page):
                     c, e.control.value, e.control),
             )
 
-            cat_refs[cat] = {"ext_row": ext_row,
+            cat_refs[cat]={"ext_row": ext_row,
                              "badge": badge_txt, "input": ext_inp}
 
-            body = ft.Container(
+            body=ft.Container(
                 content=ft.Column([
                     ext_row,
                     ft.Row([
@@ -634,9 +646,9 @@ def main(page: ft.Page):
             )
 
             def on_change(e, c=cat):
-                exp_state[c] = e.data == "true"
+                exp_state[c]=e.data == "true"
 
-            tile = ft.ExpansionTile(
+            tile=ft.ExpansionTile(
                 leading=ft.Icon(icon_for(idx), size=16, color="#8B9EAF"),
                 title=ft.Row([
                     ft.Text(cat.replace("_", " "), size=13,
@@ -672,7 +684,7 @@ def main(page: ft.Page):
 
         # ── Input nueva categoría ──
 
-        new_input = ft.TextField(
+        new_input=ft.TextField(
             hint_text="Nueva categoría", dense=True,
             content_padding=ft.Padding(8, 4, 8, 4),
             text_size=12, hint_style=ft.TextStyle(size=12, color="#556677"),
@@ -721,7 +733,8 @@ def main(page: ft.Page):
                     14, 0, 14, 2), height=18),
                 ft.Divider(height=1, color="#333333"),
                 # Árbol
-                ft.Container(content=tree_col, expand=True, bgcolor=BACKGROUND_COLOR),
+                ft.Container(content=tree_col, expand=True,
+                             bgcolor=BACKGROUND_COLOR),
             ], spacing=0, expand=True),
             height=620,
             bgcolor=BACKGROUND_COLOR,
@@ -730,16 +743,72 @@ def main(page: ft.Page):
         )
 
     def viewPreviewPerfil(perfil):
-        return ft.Card()
+
+        data=config.getStructureFolder()
+
+        panels=[]
+        for categoria, archivos in data.items():
+            panel_content=ft.Column(
+                controls=[
+                    ft.ListTile(
+                        leading=ft.Icon(
+                            ft.Icons.INSERT_DRIVE_FILE_OUTLINED, size=16, color="#8B9EAF"),
+                        title=ft.Text(f.name, size=12, color="#C0C8D4"),
+                        dense=True,
+                    )
+                    for f in archivos
+                ],
+                spacing=0,
+            )
+
+            panel=ft.ExpansionPanel(
+                bgcolor="#1A202E",
+                header=ft.ListTile(
+                    leading=ft.Icon(ft.Icons.FOLDER_OUTLINED,
+                                    color=ft.Colors.BLUE_400),
+                    title=ft.Text(
+                        categoria.replace("_", " "),
+                        size=14,
+                        weight=ft.FontWeight.W_500,
+                        color="#C0C8D4",
+                    ),
+                    trailing=ft.Text(
+                        str(len(archivos)),
+                        size=12,
+                        color="#8B9EAF",
+                    ),
+                ),
+                content=ft.Container(
+                    content=panel_content,
+                    padding=ft.Padding(16, 4, 16, 8),
+                    bgcolor="#0D121C",
+                ),
+                can_tap_header=True,
+            )
+            panels.append(panel)
+
+        expansion_panel_list=ft.ExpansionPanelList(
+            controls=panels,
+            elevation=0,
+            divider_color="#333333",
+        )
+
+        return ft.Card(
+            height=620,
+            content=ft.Column(
+                controls=[expansion_panel_list],
+                scroll=ft.ScrollMode.AUTO,
+            )
+        )
 
     def tooglePreviewView(e, perfil, vistaEditar):
 
         if vistaEditar:
             print(f"🔍 Vista previa del perfil: {perfil} (modo edición)")
-            editContainerPreviewRef.current.content = viewEditarPerfil(perfil)
+            editContainerPreviewRef.current.content=viewEditarPerfil(perfil)
         else:
             print(f"🔍 Vista previa del perfil: {perfil}")
-            editContainerPreviewRef.current.content = viewPreviewPerfil(perfil)
+            editContainerPreviewRef.current.content=viewPreviewPerfil(perfil)
 
     def createProfileUI(perfil):
         return ft.Container(
@@ -803,7 +872,7 @@ def main(page: ft.Page):
         )
 
     def setupProfiles():
-        perfiles = config.getProfiles()
+        perfiles=config.getProfiles()
 
         return ft.Column(
             ref=profilesRef,
@@ -854,11 +923,11 @@ def main(page: ft.Page):
         )
 
     def addProfile():
-        nombre = nombrePerfil.current.value.strip()
+        nombre=nombrePerfil.current.value.strip()
         if not nombre:
             return
 
-        perfiles = config.getProfiles()
+        perfiles=config.getProfiles()
         if f"config_{nombre}.json" in perfiles:
             print("⚠️ Ya existe un perfil con ese nombre.")
             return
@@ -870,7 +939,7 @@ def main(page: ft.Page):
         profilesRef.current.controls[1].controls.append(
             createProfileUI(f"config_{nombre}.json")
         )
-        contadorPerfilesRef.current.value = str(len(perfiles) + 1)
+        contadorPerfilesRef.current.value=str(len(perfiles) + 1)
         contadorPerfilesRef.current.update()
 
     def profilesUI():
@@ -916,11 +985,11 @@ def main(page: ft.Page):
             content=ft.Container(padding=20, ref=editContainerPreviewRef),
         )
 
-    page.bgcolor = "#101622"
-    page.window.height = 820
+    page.bgcolor="#101622"
+    page.window.height=820
     page.add(
         ft.Card(
-            bgcolor = BACKGROUND_COLOR,
+            bgcolor=BACKGROUND_COLOR,
             elevation=5,
             content=ft.Container(
                 padding=20,
