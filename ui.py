@@ -13,6 +13,11 @@ def main(page: ft.Page):
     nombreAPP = "My Optimizer"
     page.title = nombreAPP
 
+    # COLORS
+    
+    BACKGROUND_COLOR = "#1A202E"
+    BACKGROUND_COLOR_TERMINAL = "#0D121C"
+    
     config = Configuracion()
     destinyRef = ft.Ref[ft.Text]()
     foldersRef = ft.Ref[ft.GridView]()
@@ -49,7 +54,7 @@ def main(page: ft.Page):
 
     def systemUI():
         return ft.Card(
-            bgcolor="#1A202E",
+            bgcolor=BACKGROUND_COLOR,
             elevation=5,
             content=ft.Container(
                 padding=20,
@@ -149,7 +154,7 @@ def main(page: ft.Page):
                                 border=ft.border.all(
                                     2, "#333333"
                                 ),  # borde gris muy oscuro
-                                bgcolor="#0D121C",  # fondo oscuro tipo terminal
+                                bgcolor=BACKGROUND_COLOR_TERMINAL,  # fondo oscuro tipo terminal
                                 content=ft.GestureDetector(
                                     on_tap=pickFiles,
                                     mouse_cursor=ft.MouseCursor.CLICK,
@@ -283,6 +288,7 @@ def main(page: ft.Page):
     def onPerfilClick(e, perfil):
         nonlocal profileSelected
         profileSelected = perfil
+        config.setPerfil(perfil)
         print(f"✨ Perfil seleccionado: {perfil}")
 
         # Animación suave al seleccionar
@@ -318,6 +324,7 @@ def main(page: ft.Page):
 
         # Actualizar vista previa al seleccionar
         tooglePreviewView(None, perfil, False)
+        config.getStructureFolder()
 
     def dialogSeguroEliminarPerfil(perfil):
         nombre_perfil = perfil.replace("config_", "").replace(".json", "")
@@ -463,7 +470,7 @@ def main(page: ft.Page):
                         ],
                         spacing=2, tight=True,
                     ),
-                    bgcolor="#1A202E",
+                    bgcolor=BACKGROUND_COLOR,
                     padding=ft.Padding(6, 2, 2, 2),
                     border_radius=4,
                     border=ft.Border.all(1, "#222222"),
@@ -598,7 +605,7 @@ def main(page: ft.Page):
                 hint_text="ext", dense=True,
                 content_padding=ft.Padding(8, 4, 8, 4),
                 text_size=11, hint_style=ft.TextStyle(size=11, color="#556677"),
-                color="#E0E6ED", bgcolor="#1A202E",
+                color="#E0E6ED", bgcolor=BACKGROUND_COLOR,
                 border_color="#222222", focused_border_color=ACCENT,
                 border_radius=4, width=80, height=30,
                 on_submit=lambda e, c=cat: add_ext(
@@ -640,7 +647,7 @@ def main(page: ft.Page):
                 tile_padding=ft.Padding(12, 0, 12, 0),
                 controls_padding=ft.Padding(0, 0, 0, 0),
                 dense=True, min_tile_height=34,
-                collapsed_bgcolor="#151B27", bgcolor="#0D121C",
+                collapsed_bgcolor="#151B27", bgcolor=BACKGROUND_COLOR_TERMINAL,
                 icon_color="#8B9EAF", collapsed_icon_color="#556677",
                 shape=ft.RoundedRectangleBorder(radius=0),
                 collapsed_shape=ft.RoundedRectangleBorder(radius=0),
@@ -669,7 +676,7 @@ def main(page: ft.Page):
             hint_text="Nueva categoría", dense=True,
             content_padding=ft.Padding(8, 4, 8, 4),
             text_size=12, hint_style=ft.TextStyle(size=12, color="#556677"),
-            color="#E0E6ED", bgcolor="#1A202E",
+            color="#E0E6ED", bgcolor=BACKGROUND_COLOR,
             border_color="#222222", focused_border_color=ACCENT,
             border_radius=4, expand=True, height=32,
             on_submit=create_cat,
@@ -714,10 +721,10 @@ def main(page: ft.Page):
                     14, 0, 14, 2), height=18),
                 ft.Divider(height=1, color="#333333"),
                 # Árbol
-                ft.Container(content=tree_col, expand=True, bgcolor="#1A202E"),
+                ft.Container(content=tree_col, expand=True, bgcolor=BACKGROUND_COLOR),
             ], spacing=0, expand=True),
             height=620,
-            bgcolor="#1A202E",
+            bgcolor=BACKGROUND_COLOR,
             border=ft.Border.all(1, "#333333"),
             border_radius=6,
         )
@@ -868,7 +875,7 @@ def main(page: ft.Page):
 
     def profilesUI():
         return ft.Card(
-            bgcolor="#1A202E",
+            bgcolor=BACKGROUND_COLOR,
             width=400,
             elevation=5,
             content=ft.Container(
@@ -887,7 +894,7 @@ def main(page: ft.Page):
                                 ft.TextField(
                                     hint_text="Nombre del perfil",
                                     expand=True,
-                                    bgcolor="#0D121C",
+                                    bgcolor=BACKGROUND_COLOR_TERMINAL,
                                     border=ft.border.all(2, "#333333"),
                                     ref=nombrePerfil,
                                 ),
@@ -905,7 +912,7 @@ def main(page: ft.Page):
 
     def previewUI():
         return ft.Card(
-            bgcolor="#1A202E",
+            bgcolor=BACKGROUND_COLOR,
             content=ft.Container(padding=20, ref=editContainerPreviewRef),
         )
 
@@ -913,7 +920,7 @@ def main(page: ft.Page):
     page.window.height = 820
     page.add(
         ft.Card(
-            bgcolor="#1A202E",
+            bgcolor = BACKGROUND_COLOR,
             elevation=5,
             content=ft.Container(
                 padding=20,
