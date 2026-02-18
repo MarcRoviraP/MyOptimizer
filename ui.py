@@ -12,6 +12,8 @@ import json
 def main(page: ft.Page):
     nombreAPP = "My Optimizer"
     page.title = nombreAPP
+    page.window.icon = os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), "myOptimizer.ico")
 
     # COLORS
 
@@ -191,42 +193,66 @@ def main(page: ft.Page):
     def uiCustomFolderCard(carpeta):
         def delete_folder(e):
             if config.removeFolderFromStructure(carpeta):
-                # Buscamos el control en la lista y lo removemos
                 for control in foldersRef.current.controls[:]:
                     if getattr(control, "data", None) == carpeta:
                         foldersRef.current.controls.remove(control)
                         break
                 page.update()
 
+        nombre = carpeta.split("/")[-1].split("\\")[-1]
+
         return ft.Card(
             data=carpeta,
             elevation=2,
-            bgcolor="#3000FF40",
+            bgcolor="#1A202E",
             shape=ft.RoundedRectangleBorder(radius=10),
-            content=ft.GestureDetector(
-                on_double_tap=delete_folder,
-                content=ft.Container(
-                    padding=ft.padding.symmetric(horizontal=12, vertical=6),
-                    content=ft.Column(
-                        spacing=8,
-                        alignment=ft.MainAxisAlignment.CENTER,
-                        controls=[
-                            ft.Icon(
-                                ft.Icons.FOLDER,
-                                color=ft.Colors.YELLOW,
-                                size=20,
-                            ),
-                            ft.Text(
-                                carpeta.split("/")[-1],
-                                max_lines=3,
-                                overflow=ft.TextOverflow.ELLIPSIS,
-                                color=ft.Colors.WHITE,
-                                size=14,
-                                weight=ft.FontWeight.BOLD,
-                            ),
-                        ],
+            content=ft.Stack(
+                controls=[
+                    # Contenido principal centrado
+                    ft.Container(
+                        width=110,
+                        height=90,
+                        padding=ft.Padding(8, 14, 8, 8),
+                        content=ft.Column(
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=4,
+                            controls=[
+                                ft.Icon(
+                                    ft.Icons.FOLDER_ROUNDED,
+                                    color=ft.Colors.AMBER_400,
+                                    size=32,
+                                ),
+                                ft.Text(
+                                    nombre,
+                                    max_lines=2,
+                                    overflow=ft.TextOverflow.ELLIPSIS,
+                                    color="#C0C8D4",
+                                    size=11,
+                                    weight=ft.FontWeight.W_500,
+                                    text_align=ft.TextAlign.CENTER,
+                                ),
+                            ],
+                        ),
                     ),
-                ),
+                    # Botón ✕ en esquina superior derecha
+                    ft.Container(
+                        right=0,
+                        top=0,
+                        content=ft.IconButton(
+                            icon=ft.Icons.CLOSE,
+                            icon_color="#667788",
+                            icon_size=14,
+                            width=26,
+                            height=26,
+                            tooltip="Eliminar",
+                            on_click=delete_folder,
+                            style=ft.ButtonStyle(
+                                padding=ft.Padding(0, 0, 0, 0),
+                            ),
+                        ),
+                    ),
+                ],
             ),
         )
 
@@ -1227,6 +1253,7 @@ def main(page: ft.Page):
     def previewUI():
         return ft.Card(
             bgcolor=BACKGROUND_COLOR,
+            height=660,
             content=ft.Container(padding=20, ref=editContainerPreviewRef),
         )
 
@@ -1275,4 +1302,4 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.app(target=main, assets_dir=os.path.dirname(os.path.abspath(__file__)))
