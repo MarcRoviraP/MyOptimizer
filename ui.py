@@ -26,6 +26,9 @@ def main(page: ft.Page):
     contadorPerfilesRef = ft.Ref[ft.Text]()
     editContainerPreviewRef = ft.Ref[ft.Container]()
 
+    # [flag, save_fn] — viewEditarPerfil los actualiza; tooglePreviewView los lee
+    editor_unsaved = [False, None]
+
     profileSelected = config.getProfiles()[0] if config.getProfiles() else None
 
     def seleccionar_carpeta():
@@ -228,7 +231,7 @@ def main(page: ft.Page):
         )
 
     def añadirCarpeta():
-        selectedDirectory=seleccionar_carpeta()
+        selectedDirectory = seleccionar_carpeta()
         if selectedDirectory:
             if config.addFolderToStructure(selectedDirectory):
                 foldersRef.current.controls.append(
@@ -237,14 +240,14 @@ def main(page: ft.Page):
                 foldersRef.current.update()
 
     def folderOrganizerUI():
-        listaCarpetas=config.folderStructure
+        listaCarpetas = config.folderStructure
 
         # Crear las tarjetas dinámicas de las carpetas
-        carpeta_cards=[uiCustomFolderCard(
+        carpeta_cards = [uiCustomFolderCard(
             carpeta) for carpeta in listaCarpetas]
 
         # Tarjeta fija para "Agregar carpeta"
-        agregar_card=ft.Card(
+        agregar_card = ft.Card(
             elevation=2,
             bgcolor="#0000FF40",
             shape=ft.RoundedRectangleBorder(
@@ -280,7 +283,7 @@ def main(page: ft.Page):
             ),
         )
 
-        todas_las_cards=carpeta_cards + [agregar_card]
+        todas_las_cards = carpeta_cards + [agregar_card]
 
         # GridView responsive
         return ft.Container(
@@ -300,29 +303,29 @@ def main(page: ft.Page):
 
     def onPerfilClick(e, perfil):
         nonlocal profileSelected
-        profileSelected=perfil
+        profileSelected = perfil
         config.setPerfil(perfil)
         print(f"✨ Perfil seleccionado: {perfil}")
 
         # Animación suave al seleccionar
         for control in profilesRef.current.controls[1].controls:
             if isinstance(control, ft.Container):
-                tile=control.content
-                is_selected=tile.title.value == perfil.replace("config_", "").replace(
+                tile = control.content
+                is_selected = tile.title.value == perfil.replace("config_", "").replace(
                     ".json", ""
                 )
 
                 # Efecto visual mejorado
-                control.bgcolor=(
+                control.bgcolor = (
                     ft.Colors.with_opacity(0.15, ft.Colors.BLUE)
                     if is_selected
                     else None
                 )
-                control.border=(
+                control.border = (
                     ft.border.all(
                         2, ft.Colors.BLUE_400) if is_selected else None
                 )
-                control.shadow=(
+                control.shadow = (
                     ft.BoxShadow(
                         spread_radius=1,
                         blur_radius=8,
@@ -339,19 +342,19 @@ def main(page: ft.Page):
         tooglePreviewView(None, perfil, False)
 
     def dialogSeguroEliminarPerfil(perfil):
-        nombre_perfil=perfil.replace("config_", "").replace(".json", "")
+        nombre_perfil = perfil.replace("config_", "").replace(".json", "")
         print(f"⚠️ Confirmar eliminación del perfil: {nombre_perfil}")
 
         def eliminarPerfilConfirmado(e):
-            dlg.open=False
+            dlg.open = False
             page.update()
             onDeletePerfil(e, perfil)
 
         def cerrar_dialog(e):
-            dlg.open=False
+            dlg.open = False
             page.update()
 
-        dlg=ft.AlertDialog(
+        dlg = ft.AlertDialog(
             modal=True,
             title=ft.Row(
                 controls=[
@@ -407,14 +410,14 @@ def main(page: ft.Page):
         )
 
         page.overlay.append(dlg)  # ✅ Agregar al overlay
-        dlg.open=True  # ✅ Abrir
+        dlg.open = True  # ✅ Abrir
         page.update()  # ✅ Actualizar
 
     def onDeletePerfil(e, perfil):
         print(f"🗑️ Eliminando perfil: {perfil}")
         os.remove(os.path.join(config.RUTA_CONFIG, perfil))
         # Eliminar de la UI
-        profilesRef.current.controls[1].controls=[
+        profilesRef.current.controls[1].controls = [
             c
             for c in profilesRef.current.controls[1].controls
             if not (
@@ -423,16 +426,16 @@ def main(page: ft.Page):
                 == perfil.replace("config_", "").replace(".json", "")
             )
         ]
-        contadorPerfilesRef.current.value=str(
+        contadorPerfilesRef.current.value = str(
             int(contadorPerfilesRef.current.value) - 1
         )
         contadorPerfilesRef.current.update()
         profilesRef.current.update()
 
     def viewEditarPerfil(perfil):
-        ACCENT="#4C8BF5"
-        ACCENT_LIGHT="#1A2A4A"
-        ICON_POOL=[
+        ACCENT = "#4C8BF5"
+        ACCENT_LIGHT = "#1A2A4A"
+        ICON_POOL = [
             ft.Icons.PHOTO_OUTLINED, ft.Icons.DRAW_OUTLINED,
             ft.Icons.PICTURE_AS_PDF_OUTLINED, ft.Icons.DESCRIPTION_OUTLINED,
             ft.Icons.TABLE_CHART_OUTLINED, ft.Icons.SLIDESHOW_OUTLINED,
@@ -445,17 +448,17 @@ def main(page: ft.Page):
             ft.Icons.ACCESS_TIME, ft.Icons.LINK, ft.Icons.FOLDER_OUTLINED,
         ]
 
-        nombre=perfil.replace("config_", "").replace(".json", "")
-        perfilData=config.viewProfile(perfil)
-        ruta_json=os.path.join(config.RUTA_CONFIG, perfil)
+        nombre = perfil.replace("config_", "").replace(".json", "")
+        perfilData = config.viewProfile(perfil)
+        ruta_json = os.path.join(config.RUTA_CONFIG, perfil)
 
-        cat_refs={}
-        exp_state={}
-        tree_col=ft.Column(spacing=0, scroll="auto")
-        status=ft.Text("", size=11, color="#8B9EAF", italic=True)
+        cat_refs = {}
+        exp_state = {}
+        tree_col = ft.Column(spacing=0, scroll="auto")
+        status = ft.Text("", size=11, color="#8B9EAF", italic=True)
 
         def set_status(msg):
-            status.value=msg
+            status.value = msg
             status.update()
 
         def icon_for(i):
@@ -492,11 +495,11 @@ def main(page: ft.Page):
         # ── Actualización in-place (NO reconstruye el tile) ──
 
         def update_cat_ui(cat):
-            ref=cat_refs.get(cat)
+            ref = cat_refs.get(cat)
             if not ref:
                 return
-            exts=perfilData.get(cat, [])
-            row=ref["ext_row"]
+            exts = perfilData.get(cat, [])
+            row = ref["ext_row"]
             row.controls.clear()
             if exts:
                 for e in sorted(exts):
@@ -507,37 +510,42 @@ def main(page: ft.Page):
                             italic=True, color="#556677")
                 )
             row.update()
-            ref["badge"].value=str(len(exts))
+            ref["badge"].value = str(len(exts))
             ref["badge"].update()
 
         # ── Acciones ──
 
+        def mark_unsaved():
+            editor_unsaved[0] = True
+
         def add_ext(cat, val, inp):
-            ext=val.strip().lower().lstrip(".")
+            ext = val.strip().lower().lstrip(".")
             if not ext:
                 return
             if ext in perfilData[cat]:
                 set_status(f"⚠ .{ext} ya existe en {cat.replace('_', ' ')}")
                 return
             perfilData[cat].append(ext)
-            inp.value=""
+            inp.value = ""
             inp.update()
             update_cat_ui(cat)
+            mark_unsaved()
             set_status(f"+ .{ext} → {cat.replace('_', ' ')}")
 
         def remove_ext(cat, ext):
             if ext in perfilData[cat]:
                 perfilData[cat].remove(ext)
             update_cat_ui(cat)
+            mark_unsaved()
             set_status(f"− .{ext} de {cat.replace('_', ' ')}")
 
         def on_drop(e, cat_dest):
-            src=page.get_control(e.src_id)
-            data=src.data
+            src = page.get_control(e.src_id)
+            data = src.data
             if isinstance(data, str):
-                data=json.loads(data)
-            ext=data["ext"]
-            cat_src=data["from"]
+                data = json.loads(data)
+            ext = data["ext"]
+            cat_src = data["from"]
             if cat_src == cat_dest:
                 return
             if ext in perfilData[cat_src]:
@@ -546,6 +554,7 @@ def main(page: ft.Page):
                 perfilData[cat_dest].append(ext)
             update_cat_ui(cat_src)
             update_cat_ui(cat_dest)
+            mark_unsaved()
             set_status(
                 f".{ext}  {cat_src.replace('_', ' ')} → {cat_dest.replace('_', ' ')}")
 
@@ -555,34 +564,37 @@ def main(page: ft.Page):
             cat_refs.pop(cat, None)
             exp_state.pop(cat, None)
             rebuild()
+            mark_unsaved()
             set_status(f"✕ {cat.replace('_', ' ')} eliminada")
 
         def create_cat(e):
-            n=new_input.value.strip()
+            n = new_input.value.strip()
             if not n:
                 return
-            key=n.replace(" ", "_")
+            key = n.replace(" ", "_")
             if key in perfilData:
                 set_status(f"⚠ '{n}' ya existe")
                 return
-            perfilData[key]=[]
-            exp_state[key]=True
-            new_input.value=""
+            perfilData[key] = []
+            exp_state[key] = True
+            new_input.value = ""
             new_input.update()
             rebuild()
+            mark_unsaved()
             set_status(f"+ {n}")
 
         def save(e):
             try:
-                contenido=json.dumps(
+                contenido = json.dumps(
                     perfilData, indent=2, ensure_ascii=False)
                 with open(ruta_json, "w", encoding="utf-8") as f:
                     f.write(contenido)
-                local=os.path.join(os.path.dirname(
+                local = os.path.join(os.path.dirname(
                     os.path.abspath(__file__)), perfil)
                 if os.path.exists(local):
                     with open(local, "w", encoding="utf-8") as f:
                         f.write(contenido)
+                editor_unsaved[0] = False
                 set_status(f"💾 {perfil} guardado")
             except Exception as ex:
                 set_status(f"❌ Error: {ex}")
@@ -593,12 +605,13 @@ def main(page: ft.Page):
             perfilData.update(config.viewProfile(perfil))
             exp_state.clear()
             rebuild()
+            editor_unsaved[0] = False
             set_status("↩ restaurado")
 
         # ── Crear tile de categoría ──
 
         def make_tile(cat, exts, idx):
-            ext_row=ft.Row(
+            ext_row = ft.Row(
                 controls=(
                     [make_chip(e, cat) for e in sorted(exts)]
                     if exts else
@@ -608,12 +621,12 @@ def main(page: ft.Page):
                 wrap=True, spacing=4, run_spacing=4,
                 alignment=ft.MainAxisAlignment.END,
             )
-            badge_txt=ft.Text(str(len(exts)), size=10,
+            badge_txt = ft.Text(str(len(exts)), size=10,
                                 weight=ft.FontWeight.W_600, color=ACCENT)
-            badge=ft.Container(content=badge_txt, bgcolor=ACCENT_LIGHT,
+            badge = ft.Container(content=badge_txt, bgcolor=ACCENT_LIGHT,
                                  padding=ft.Padding(5, 1, 5, 1), border_radius=8)
 
-            ext_inp=ft.TextField(
+            ext_inp = ft.TextField(
                 hint_text="ext", dense=True,
                 content_padding=ft.Padding(8, 4, 8, 4),
                 text_size=11, hint_style=ft.TextStyle(size=11, color="#556677"),
@@ -624,10 +637,10 @@ def main(page: ft.Page):
                     c, e.control.value, e.control),
             )
 
-            cat_refs[cat]={"ext_row": ext_row,
+            cat_refs[cat] = {"ext_row": ext_row,
                              "badge": badge_txt, "input": ext_inp}
 
-            body=ft.Container(
+            body = ft.Container(
                 content=ft.Column([
                     ext_row,
                     ft.Row([
@@ -646,9 +659,9 @@ def main(page: ft.Page):
             )
 
             def on_change(e, c=cat):
-                exp_state[c]=e.data == "true"
+                exp_state[c] = e.data == "true"
 
-            tile=ft.ExpansionTile(
+            tile = ft.ExpansionTile(
                 leading=ft.Icon(icon_for(idx), size=16, color="#8B9EAF"),
                 title=ft.Row([
                     ft.Text(cat.replace("_", " "), size=13,
@@ -684,7 +697,7 @@ def main(page: ft.Page):
 
         # ── Input nueva categoría ──
 
-        new_input=ft.TextField(
+        new_input = ft.TextField(
             hint_text="Nueva categoría", dense=True,
             content_padding=ft.Padding(8, 4, 8, 4),
             text_size=12, hint_style=ft.TextStyle(size=12, color="#556677"),
@@ -698,7 +711,7 @@ def main(page: ft.Page):
         for i, (c, exts) in enumerate(perfilData.items()):
             tree_col.controls.append(make_tile(c, exts, i))
 
-        return ft.Container(
+        resultado = ft.Container(
             content=ft.Column([
                 # Header
                 ft.Container(
@@ -741,14 +754,17 @@ def main(page: ft.Page):
             border=ft.Border.all(1, "#333333"),
             border_radius=6,
         )
+        # Exponer save al scope de main para el dialog de cambios sin guardar
+        editor_unsaved[1] = save
+        return resultado
 
     def viewPreviewPerfil(perfil):
 
-        data=config.getStructureFolder()
+        data = config.getStructureFolder()
 
-        panels=[]
+        panels = []
         for categoria, archivos in data.items():
-            panel_content=ft.Column(
+            panel_content = ft.Column(
                 controls=[
                     ft.ListTile(
                         leading=ft.Icon(
@@ -761,7 +777,7 @@ def main(page: ft.Page):
                 spacing=0,
             )
 
-            panel=ft.ExpansionPanel(
+            panel = ft.ExpansionPanel(
                 bgcolor="#1A202E",
                 header=ft.ListTile(
                     leading=ft.Icon(ft.Icons.FOLDER_OUTLINED,
@@ -787,28 +803,257 @@ def main(page: ft.Page):
             )
             panels.append(panel)
 
-        expansion_panel_list=ft.ExpansionPanelList(
+        expansion_panel_list = ft.ExpansionPanelList(
             controls=panels,
             elevation=0,
             divider_color="#333333",
         )
 
+        modo_ref = ft.Ref[ft.RadioGroup]()
+        btn_aplicar_ref = ft.Ref[ft.FilledButton]()
+        progress_bar = ft.ProgressBar(
+            value=0,
+            width=float("inf"),
+            color=ft.Colors.BLUE_400,
+            bgcolor="#1A202E",
+            visible=False,
+        )
+        progress_label = ft.Text("", size=11, color="#8B9EAF", italic=True)
+
+        def on_progress(categoria, idx, total):
+            progress_bar.value = idx / total
+            progress_label.value = f"{'Copiando' if modo_ref.current.value == 'copiar' else 'Moviendo'} · {categoria.replace('_', ' ')} ({idx}/{total})"
+            progress_bar.update()
+            progress_label.update()
+
+        def aplicar(e):
+            if not config.destinyPath:
+                def seleccionar_y_cerrar(e):
+                    dlg_destino.open = False
+                    page.update()
+                    selectedDirectory = seleccionar_carpeta()
+                    if selectedDirectory:
+                        config.setDestinyPath(selectedDirectory)
+                        destinyRef.current.value = selectedDirectory
+                        destinyRef.current.update()
+
+                dlg_destino = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Row(controls=[
+                        ft.Icon(ft.Icons.FOLDER_OPEN,
+                                color=ft.Colors.ORANGE, size=26),
+                        ft.Text("Carpeta de destino requerida",
+                                weight=ft.FontWeight.BOLD),
+                    ]),
+                    content=ft.Container(
+                        content=ft.Text(
+                            "Debes seleccionar una carpeta de destino antes de aplicar la organización.",
+                            size=13,
+                        ),
+                        width=340,
+                    ),
+                    actions=[
+                        ft.TextButton("Cancelar", on_click=lambda e: (
+                            setattr(dlg_destino, "open", False), page.update())),
+                        ft.FilledButton(
+                            "Seleccionar carpeta",
+                            icon=ft.Icons.FOLDER_OPEN,
+                            on_click=seleccionar_y_cerrar,
+                            style=ft.ButtonStyle(
+                                bgcolor=ft.Colors.BLUE_700, color=ft.Colors.WHITE),
+                        ),
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                )
+                page.overlay.append(dlg_destino)
+                dlg_destino.open = True
+                page.update()
+                return
+
+            import threading
+            modo = modo_ref.current.value
+
+            def run():
+                progress_bar.value = 0
+                progress_bar.visible = True
+                progress_label.value = "Preparando..."
+                progress_bar.update()
+                progress_label.update()
+                try:
+                    config.applyOrganization(modo, on_progress=on_progress)
+                    progress_label.value = f"\u2705 {'Copiado' if modo == 'copiar' else 'Movido'} correctamente"
+                    progress_bar.value = 1
+                    # Actualizar barra ANTES de reemplazar el contenedor
+                    progress_bar.update()
+                    progress_label.update()
+                    # Recargar la preview (quedará vacía si no hay archivos)
+                    editContainerPreviewRef.current.content = viewPreviewPerfil(
+                        perfil)
+                    editContainerPreviewRef.current.update()
+                except Exception as ex:
+                    progress_label.value = f"\u274c Error: {ex}"
+                    progress_bar.visible = False
+                    progress_bar.update()
+                    progress_label.update()
+
+            threading.Thread(target=run, daemon=True).start()
+
+        toolbar = ft.Container(
+            content=ft.Column(
+                controls=[
+                    ft.Row(
+                        controls=[
+                            ft.RadioGroup(
+                                ref=modo_ref,
+                                value="copiar",
+                                content=ft.Row(
+                                    controls=[
+                                        ft.Radio(
+                                            value="copiar",
+                                            label="Copiar",
+                                            label_style=ft.TextStyle(
+                                                size=13, color="#C0C8D4"),
+                                            fill_color=ft.Colors.BLUE_400,
+                                        ),
+                                        ft.Radio(
+                                            value="mover",
+                                            label="Mover",
+                                            label_style=ft.TextStyle(
+                                                size=13, color="#C0C8D4"),
+                                            fill_color=ft.Colors.BLUE_400,
+                                        ),
+                                    ],
+                                    spacing=16,
+                                ),
+                            ),
+                            ft.Container(expand=True),
+                            ft.FilledButton(
+                                ref=btn_aplicar_ref,
+                                content=ft.Row(
+                                    controls=[
+                                        ft.Text("Aplicar"),
+                                        ft.Icon(ft.Icons.PLAY_ARROW_ROUNDED),
+                                    ],
+                                ),
+                                on_click=aplicar,
+                                style=ft.ButtonStyle(
+                                    bgcolor=ft.Colors.BLUE_700,
+                                    color=ft.Colors.WHITE,
+                                    shape=ft.RoundedRectangleBorder(radius=6),
+                                ),
+                            ),
+                        ],
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        spacing=8,
+                    ),
+                    progress_bar,
+                    progress_label,
+                ],
+                spacing=4,
+            ),
+            padding=ft.Padding(14, 8, 14, 8),
+            bgcolor="#151B27",
+            border=ft.Border(
+                bottom=ft.BorderSide(1, "#333333"),
+            ),
+        )
+
         return ft.Card(
             height=620,
             content=ft.Column(
-                controls=[expansion_panel_list],
+                controls=[
+                    toolbar,
+                    ft.Container(
+                        content=expansion_panel_list,
+                        expand=True,
+                    ),
+                ],
                 scroll=ft.ScrollMode.AUTO,
+                spacing=0,
             )
         )
 
     def tooglePreviewView(e, perfil, vistaEditar):
 
-        if vistaEditar:
-            print(f"🔍 Vista previa del perfil: {perfil} (modo edición)")
-            editContainerPreviewRef.current.content=viewEditarPerfil(perfil)
-        else:
+        def do_switch_to_preview():
+            editor_unsaved[0] = False
+            editor_unsaved[1] = None
             print(f"🔍 Vista previa del perfil: {perfil}")
-            editContainerPreviewRef.current.content=viewPreviewPerfil(perfil)
+            editContainerPreviewRef.current.content = viewPreviewPerfil(perfil)
+            editContainerPreviewRef.current.update()
+
+        if vistaEditar:
+            editor_unsaved[0] = False
+            print(f"🔍 Vista previa del perfil: {perfil} (modo edición)")
+            editContainerPreviewRef.current.content = viewEditarPerfil(perfil)
+        else:
+            if editor_unsaved[0]:
+                def guardar_y_salir(ev):
+                    dlg.open = False
+                    page.update()
+                    if editor_unsaved[1]:
+                        editor_unsaved[1](ev)
+                    do_switch_to_preview()
+
+                def descartar_y_salir(ev):
+                    dlg.open = False
+                    page.update()
+                    do_switch_to_preview()
+
+                def cancelar(ev):
+                    dlg.open = False
+                    page.update()
+
+                nombre_perfil = perfil.replace(
+                    "config_", "").replace(".json", "")
+                dlg = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Row(controls=[
+                        ft.Icon(ft.Icons.WARNING_ROUNDED,
+                                color=ft.Colors.ORANGE, size=26),
+                        ft.Text("Cambios sin guardar",
+                                weight=ft.FontWeight.BOLD),
+                    ]),
+                    content=ft.Container(
+                        content=ft.Column([
+                            ft.Text(f"El perfil ", size=13),
+                            ft.Container(
+                                content=ft.Text(nombre_perfil, size=14,
+                                                weight=ft.FontWeight.BOLD,
+                                                color=ft.Colors.BLUE_400),
+                                bgcolor=ft.Colors.with_opacity(
+                                    0.1, ft.Colors.BLUE),
+                                padding=ft.Padding(10, 6, 10, 6),
+                                border_radius=6,
+                            ),
+                            ft.Text("tiene cambios sin guardar. ¿Qué quieres hacer?",
+                                    size=13),
+                        ], spacing=6, tight=True),
+                        width=340,
+                    ),
+                    actions=[
+                        ft.TextButton("Cancelar", on_click=cancelar),
+                        ft.TextButton(
+                            "Descartar cambios",
+                            style=ft.ButtonStyle(color=ft.Colors.RED_400),
+                            on_click=descartar_y_salir,
+                        ),
+                        ft.FilledButton(
+                            "Guardar",
+                            icon=ft.Icons.SAVE_OUTLINED,
+                            on_click=guardar_y_salir,
+                            style=ft.ButtonStyle(
+                                bgcolor=ft.Colors.BLUE_700, color=ft.Colors.WHITE),
+                        ),
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                )
+                page.overlay.append(dlg)
+                dlg.open = True
+                page.update()
+                return
+
+            do_switch_to_preview()
 
     def createProfileUI(perfil):
         return ft.Container(
@@ -872,7 +1117,7 @@ def main(page: ft.Page):
         )
 
     def setupProfiles():
-        perfiles=config.getProfiles()
+        perfiles = config.getProfiles()
 
         return ft.Column(
             ref=profilesRef,
@@ -923,11 +1168,11 @@ def main(page: ft.Page):
         )
 
     def addProfile():
-        nombre=nombrePerfil.current.value.strip()
+        nombre = nombrePerfil.current.value.strip()
         if not nombre:
             return
 
-        perfiles=config.getProfiles()
+        perfiles = config.getProfiles()
         if f"config_{nombre}.json" in perfiles:
             print("⚠️ Ya existe un perfil con ese nombre.")
             return
@@ -939,7 +1184,7 @@ def main(page: ft.Page):
         profilesRef.current.controls[1].controls.append(
             createProfileUI(f"config_{nombre}.json")
         )
-        contadorPerfilesRef.current.value=str(len(perfiles) + 1)
+        contadorPerfilesRef.current.value = str(len(perfiles) + 1)
         contadorPerfilesRef.current.update()
 
     def profilesUI():
@@ -985,8 +1230,8 @@ def main(page: ft.Page):
             content=ft.Container(padding=20, ref=editContainerPreviewRef),
         )
 
-    page.bgcolor="#101622"
-    page.window.height=820
+    page.bgcolor = "#101622"
+    page.window.height = 820
     page.add(
         ft.Card(
             bgcolor=BACKGROUND_COLOR,
