@@ -12,8 +12,9 @@ import json
 def main(page: ft.Page):
     nombreAPP = "My Optimizer"
     page.title = nombreAPP
-    page.window.icon = os.path.join(os.path.dirname(
-        os.path.abspath(__file__)), "myOptimizer.ico")
+    page.window.icon = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "myOptimizer.ico"
+    )
 
     # COLORS
 
@@ -269,8 +270,7 @@ def main(page: ft.Page):
         listaCarpetas = config.folderStructure
 
         # Crear las tarjetas dinámicas de las carpetas
-        carpeta_cards = [uiCustomFolderCard(
-            carpeta) for carpeta in listaCarpetas]
+        carpeta_cards = [uiCustomFolderCard(carpeta) for carpeta in listaCarpetas]
 
         # Tarjeta fija para "Agregar carpeta"
         agregar_card = ft.Card(
@@ -348,8 +348,7 @@ def main(page: ft.Page):
                     else None
                 )
                 control.border = (
-                    ft.border.all(
-                        2, ft.Colors.BLUE_400) if is_selected else None
+                    ft.border.all(2, ft.Colors.BLUE_400) if is_selected else None
                 )
                 control.shadow = (
                     ft.BoxShadow(
@@ -384,10 +383,8 @@ def main(page: ft.Page):
             modal=True,
             title=ft.Row(
                 controls=[
-                    ft.Icon(ft.Icons.WARNING_ROUNDED,
-                            color=ft.Colors.ORANGE, size=28),
-                    ft.Text("Confirmar eliminación",
-                            weight=ft.FontWeight.BOLD),
+                    ft.Icon(ft.Icons.WARNING_ROUNDED, color=ft.Colors.ORANGE, size=28),
+                    ft.Text("Confirmar eliminación", weight=ft.FontWeight.BOLD),
                 ]
             ),
             content=ft.Container(
@@ -403,8 +400,7 @@ def main(page: ft.Page):
                                 weight=ft.FontWeight.BOLD,
                                 color=ft.Colors.BLUE_700,
                             ),
-                            bgcolor=ft.Colors.with_opacity(
-                                0.1, ft.Colors.BLUE),
+                            bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.BLUE),
                             padding=ft.Padding(10, 10, 10, 10),
                             border_radius=8,
                             margin=ft.Margin(0, 10, 0, 10),
@@ -462,16 +458,27 @@ def main(page: ft.Page):
         ACCENT = "#4C8BF5"
         ACCENT_LIGHT = "#1A2A4A"
         ICON_POOL = [
-            ft.Icons.PHOTO_OUTLINED, ft.Icons.DRAW_OUTLINED,
-            ft.Icons.PICTURE_AS_PDF_OUTLINED, ft.Icons.DESCRIPTION_OUTLINED,
-            ft.Icons.TABLE_CHART_OUTLINED, ft.Icons.SLIDESHOW_OUTLINED,
-            ft.Icons.TEXT_SNIPPET_OUTLINED, ft.Icons.BOOK_OUTLINED,
-            ft.Icons.DATA_OBJECT, ft.Icons.APP_SETTINGS_ALT,
-            ft.Icons.FOLDER_ZIP_OUTLINED, ft.Icons.VIDEO_LIBRARY_OUTLINED,
-            ft.Icons.AUDIO_FILE_OUTLINED, ft.Icons.CODE,
-            ft.Icons.STORAGE_OUTLINED, ft.Icons.SETTINGS_OUTLINED,
-            ft.Icons.FONT_DOWNLOAD_OUTLINED, ft.Icons.ARTICLE_OUTLINED,
-            ft.Icons.ACCESS_TIME, ft.Icons.LINK, ft.Icons.FOLDER_OUTLINED,
+            ft.Icons.PHOTO_OUTLINED,
+            ft.Icons.DRAW_OUTLINED,
+            ft.Icons.PICTURE_AS_PDF_OUTLINED,
+            ft.Icons.DESCRIPTION_OUTLINED,
+            ft.Icons.TABLE_CHART_OUTLINED,
+            ft.Icons.SLIDESHOW_OUTLINED,
+            ft.Icons.TEXT_SNIPPET_OUTLINED,
+            ft.Icons.BOOK_OUTLINED,
+            ft.Icons.DATA_OBJECT,
+            ft.Icons.APP_SETTINGS_ALT,
+            ft.Icons.FOLDER_ZIP_OUTLINED,
+            ft.Icons.VIDEO_LIBRARY_OUTLINED,
+            ft.Icons.AUDIO_FILE_OUTLINED,
+            ft.Icons.CODE,
+            ft.Icons.STORAGE_OUTLINED,
+            ft.Icons.SETTINGS_OUTLINED,
+            ft.Icons.FONT_DOWNLOAD_OUTLINED,
+            ft.Icons.ARTICLE_OUTLINED,
+            ft.Icons.ACCESS_TIME,
+            ft.Icons.LINK,
+            ft.Icons.FOLDER_OUTLINED,
         ]
 
         nombre = perfil.replace("config_", "").replace(".json", "")
@@ -499,17 +506,25 @@ def main(page: ft.Page):
                 content=ft.Container(
                     content=ft.Row(
                         controls=[
-                            ft.Text(f".{ext}", size=11, weight=ft.FontWeight.W_500,
-                                    color="#C0C8D4", font_family="Consolas"),
+                            ft.Text(
+                                f".{ext}",
+                                size=11,
+                                weight=ft.FontWeight.W_500,
+                                color="#C0C8D4",
+                                font_family="Consolas",
+                            ),
                             ft.IconButton(
-                                icon=ft.Icons.CLOSE, icon_size=10,
-                                icon_color="#667788", tooltip="Quitar",
-                                on_click=lambda e, c=cat, x=ext: remove_ext(
-                                    c, x),
-                                width=20, height=20,
+                                icon=ft.Icons.CLOSE,
+                                icon_size=10,
+                                icon_color="#667788",
+                                tooltip="Quitar",
+                                on_click=lambda e, c=cat, x=ext: remove_ext(c, x),
+                                width=20,
+                                height=20,
                             ),
                         ],
-                        spacing=2, tight=True,
+                        spacing=2,
+                        tight=True,
                     ),
                     bgcolor=BACKGROUND_COLOR,
                     padding=ft.Padding(6, 2, 2, 2),
@@ -532,8 +547,7 @@ def main(page: ft.Page):
                     row.controls.append(make_chip(e, cat))
             else:
                 row.controls.append(
-                    ft.Text("sin extensiones", size=11,
-                            italic=True, color="#556677")
+                    ft.Text("sin extensiones", size=11, italic=True, color="#556677")
                 )
             row.update()
             ref["badge"].value = str(len(exts))
@@ -582,7 +596,8 @@ def main(page: ft.Page):
             update_cat_ui(cat_dest)
             mark_unsaved()
             set_status(
-                f".{ext}  {cat_src.replace('_', ' ')} → {cat_dest.replace('_', ' ')}")
+                f".{ext}  {cat_src.replace('_', ' ')} → {cat_dest.replace('_', ' ')}"
+            )
 
         def delete_cat(cat):
             if cat in perfilData:
@@ -611,12 +626,10 @@ def main(page: ft.Page):
 
         def save(e):
             try:
-                contenido = json.dumps(
-                    perfilData, indent=2, ensure_ascii=False)
+                contenido = json.dumps(perfilData, indent=2, ensure_ascii=False)
                 with open(ruta_json, "w", encoding="utf-8") as f:
                     f.write(contenido)
-                local = os.path.join(os.path.dirname(
-                    os.path.abspath(__file__)), perfil)
+                local = os.path.join(os.path.dirname(os.path.abspath(__file__)), perfil)
                 if os.path.exists(local):
                     with open(local, "w", encoding="utf-8") as f:
                         f.write(contenido)
@@ -640,47 +653,81 @@ def main(page: ft.Page):
             ext_row = ft.Row(
                 controls=(
                     [make_chip(e, cat) for e in sorted(exts)]
-                    if exts else
-                    [ft.Text("sin extensiones", size=11,
-                             italic=True, color="#556677")]
+                    if exts
+                    else [
+                        ft.Text(
+                            "sin extensiones", size=11, italic=True, color="#556677"
+                        )
+                    ]
                 ),
-                wrap=True, spacing=4, run_spacing=4,
+                wrap=True,
+                spacing=4,
+                run_spacing=4,
                 alignment=ft.MainAxisAlignment.END,
             )
-            badge_txt = ft.Text(str(len(exts)), size=10,
-                                weight=ft.FontWeight.W_600, color=ACCENT)
-            badge = ft.Container(content=badge_txt, bgcolor=ACCENT_LIGHT,
-                                 padding=ft.Padding(5, 1, 5, 1), border_radius=8)
-
-            ext_inp = ft.TextField(
-                hint_text="ext", dense=True,
-                content_padding=ft.Padding(8, 4, 8, 4),
-                text_size=11, hint_style=ft.TextStyle(size=11, color="#556677"),
-                color="#E0E6ED", bgcolor=BACKGROUND_COLOR,
-                border_color="#222222", focused_border_color=ACCENT,
-                border_radius=4, width=80, height=30,
-                on_submit=lambda e, c=cat: add_ext(
-                    c, e.control.value, e.control),
+            badge_txt = ft.Text(
+                str(len(exts)), size=10, weight=ft.FontWeight.W_600, color=ACCENT
+            )
+            badge = ft.Container(
+                content=badge_txt,
+                bgcolor=ACCENT_LIGHT,
+                padding=ft.Padding(5, 1, 5, 1),
+                border_radius=8,
             )
 
-            cat_refs[cat] = {"ext_row": ext_row,
-                             "badge": badge_txt, "input": ext_inp}
+            ext_inp = ft.TextField(
+                hint_text="ext",
+                dense=True,
+                content_padding=ft.Padding(8, 4, 8, 4),
+                text_size=11,
+                hint_style=ft.TextStyle(size=11, color="#556677"),
+                color="#E0E6ED",
+                bgcolor=BACKGROUND_COLOR,
+                border_color="#222222",
+                focused_border_color=ACCENT,
+                border_radius=4,
+                width=80,
+                height=30,
+                on_submit=lambda e, c=cat: add_ext(c, e.control.value, e.control),
+            )
+
+            cat_refs[cat] = {"ext_row": ext_row, "badge": badge_txt, "input": ext_inp}
 
             body = ft.Container(
-                content=ft.Column([
-                    ext_row,
-                    ft.Row([
-                        ext_inp,
-                        ft.IconButton(icon=ft.Icons.ADD, icon_size=14, icon_color=ACCENT,
-                                      tooltip="Añadir", width=28, height=28,
-                                      on_click=lambda e, c=cat, i=ext_inp: add_ext(c, i.value, i)),
-                        ft.Container(expand=True),
-                        ft.IconButton(icon=ft.Icons.DELETE_OUTLINE, icon_size=14,
-                                      icon_color="#667788", tooltip="Eliminar categoría",
-                                      width=28, height=28,
-                                      on_click=lambda e, c=cat: delete_cat(c)),
-                    ], spacing=4, vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                ], spacing=6),
+                content=ft.Column(
+                    [
+                        ext_row,
+                        ft.Row(
+                            [
+                                ext_inp,
+                                ft.IconButton(
+                                    icon=ft.Icons.ADD,
+                                    icon_size=14,
+                                    icon_color=ACCENT,
+                                    tooltip="Añadir",
+                                    width=28,
+                                    height=28,
+                                    on_click=lambda e, c=cat, i=ext_inp: add_ext(
+                                        c, i.value, i
+                                    ),
+                                ),
+                                ft.Container(expand=True),
+                                ft.IconButton(
+                                    icon=ft.Icons.DELETE_OUTLINE,
+                                    icon_size=14,
+                                    icon_color="#667788",
+                                    tooltip="Eliminar categoría",
+                                    width=28,
+                                    height=28,
+                                    on_click=lambda e, c=cat: delete_cat(c),
+                                ),
+                            ],
+                            spacing=4,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        ),
+                    ],
+                    spacing=6,
+                ),
                 padding=ft.Padding(36, 4, 12, 8),
             )
 
@@ -689,17 +736,27 @@ def main(page: ft.Page):
 
             tile = ft.ExpansionTile(
                 leading=ft.Icon(icon_for(idx), size=16, color="#8B9EAF"),
-                title=ft.Row([
-                    ft.Text(cat.replace("_", " "), size=13,
-                            weight=ft.FontWeight.W_500, color="#C0C8D4"),
-                    badge,
-                ], spacing=6),
+                title=ft.Row(
+                    [
+                        ft.Text(
+                            cat.replace("_", " "),
+                            size=13,
+                            weight=ft.FontWeight.W_500,
+                            color="#C0C8D4",
+                        ),
+                        badge,
+                    ],
+                    spacing=6,
+                ),
                 controls=[body],
                 tile_padding=ft.Padding(12, 0, 12, 0),
                 controls_padding=ft.Padding(0, 0, 0, 0),
-                dense=True, min_tile_height=34,
-                collapsed_bgcolor="#151B27", bgcolor=BACKGROUND_COLOR_TERMINAL,
-                icon_color="#8B9EAF", collapsed_icon_color="#556677",
+                dense=True,
+                min_tile_height=34,
+                collapsed_bgcolor="#151B27",
+                bgcolor=BACKGROUND_COLOR_TERMINAL,
+                icon_color="#8B9EAF",
+                collapsed_icon_color="#556677",
                 shape=ft.RoundedRectangleBorder(radius=0),
                 collapsed_shape=ft.RoundedRectangleBorder(radius=0),
                 maintain_state=True,
@@ -708,7 +765,8 @@ def main(page: ft.Page):
             )
 
             return ft.DragTarget(
-                group="ext", content=tile,
+                group="ext",
+                content=tile,
                 on_accept=lambda e, c=cat: on_drop(e, c),
                 on_will_accept=lambda e: True,
             )
@@ -724,12 +782,18 @@ def main(page: ft.Page):
         # ── Input nueva categoría ──
 
         new_input = ft.TextField(
-            hint_text="Nueva categoría", dense=True,
+            hint_text="Nueva categoría",
+            dense=True,
             content_padding=ft.Padding(8, 4, 8, 4),
-            text_size=12, hint_style=ft.TextStyle(size=12, color="#556677"),
-            color="#E0E6ED", bgcolor=BACKGROUND_COLOR,
-            border_color="#222222", focused_border_color=ACCENT,
-            border_radius=4, expand=True, height=32,
+            text_size=12,
+            hint_style=ft.TextStyle(size=12, color="#556677"),
+            color="#E0E6ED",
+            bgcolor=BACKGROUND_COLOR,
+            border_color="#222222",
+            focused_border_color=ACCENT,
+            border_radius=4,
+            expand=True,
+            height=32,
             on_submit=create_cat,
         )
 
@@ -738,43 +802,81 @@ def main(page: ft.Page):
             tree_col.controls.append(make_tile(c, exts, i))
 
         resultado = ft.Container(
-            content=ft.Column([
-                # Header
-                ft.Container(
-                    content=ft.Row([
-                        ft.Icon(ft.Icons.ACCOUNT_TREE_OUTLINED,
-                                size=16, color=ACCENT),
-                        ft.Text(nombre, size=15,
-                                weight=ft.FontWeight.W_600, color="#E0E6ED"),
-                        ft.Container(expand=True),
-                        ft.IconButton(icon=ft.Icons.RESTART_ALT, icon_size=15,
-                                      icon_color="#667788", tooltip="Restaurar",
-                                      on_click=reset, width=30, height=30),
-                        ft.IconButton(icon=ft.Icons.SAVE_OUTLINED, icon_size=15,
-                                      icon_color=ACCENT, tooltip="Guardar",
-                                      on_click=save, width=30, height=30),
-                    ], spacing=6, vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                    padding=ft.Padding(14, 10, 14, 6),
-                ),
-                # Nueva categoría
-                ft.Container(
-                    content=ft.Row([
-                        new_input,
-                        ft.IconButton(icon=ft.Icons.CREATE_NEW_FOLDER_OUTLINED,
-                                      icon_size=16, icon_color=ACCENT,
-                                      tooltip="Crear categoría",
-                                      on_click=create_cat, width=30, height=30),
-                    ], spacing=4, vertical_alignment=ft.CrossAxisAlignment.CENTER),
-                    padding=ft.Padding(14, 0, 14, 4),
-                ),
-                # Status
-                ft.Container(content=status, padding=ft.Padding(
-                    14, 0, 14, 2), height=18),
-                ft.Divider(height=1, color="#333333"),
-                # Árbol
-                ft.Container(content=tree_col, expand=True,
-                             bgcolor=BACKGROUND_COLOR),
-            ], spacing=0, expand=True),
+            content=ft.Column(
+                [
+                    # Header
+                    ft.Container(
+                        content=ft.Row(
+                            [
+                                ft.Icon(
+                                    ft.Icons.ACCOUNT_TREE_OUTLINED,
+                                    size=16,
+                                    color=ACCENT,
+                                ),
+                                ft.Text(
+                                    nombre,
+                                    size=15,
+                                    weight=ft.FontWeight.W_600,
+                                    color="#E0E6ED",
+                                ),
+                                ft.Container(expand=True),
+                                ft.IconButton(
+                                    icon=ft.Icons.RESTART_ALT,
+                                    icon_size=15,
+                                    icon_color="#667788",
+                                    tooltip="Restaurar",
+                                    on_click=reset,
+                                    width=30,
+                                    height=30,
+                                ),
+                                ft.IconButton(
+                                    icon=ft.Icons.SAVE_OUTLINED,
+                                    icon_size=15,
+                                    icon_color=ACCENT,
+                                    tooltip="Guardar",
+                                    on_click=save,
+                                    width=30,
+                                    height=30,
+                                ),
+                            ],
+                            spacing=6,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        ),
+                        padding=ft.Padding(14, 10, 14, 6),
+                    ),
+                    # Nueva categoría
+                    ft.Container(
+                        content=ft.Row(
+                            [
+                                new_input,
+                                ft.IconButton(
+                                    icon=ft.Icons.CREATE_NEW_FOLDER_OUTLINED,
+                                    icon_size=16,
+                                    icon_color=ACCENT,
+                                    tooltip="Crear categoría",
+                                    on_click=create_cat,
+                                    width=30,
+                                    height=30,
+                                ),
+                            ],
+                            spacing=4,
+                            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        ),
+                        padding=ft.Padding(14, 0, 14, 4),
+                    ),
+                    # Status
+                    ft.Container(
+                        content=status, padding=ft.Padding(14, 0, 14, 2), height=18
+                    ),
+                    ft.Divider(height=1, color="#333333"),
+                    # Árbol
+                    ft.Container(
+                        content=tree_col, expand=True, bgcolor=BACKGROUND_COLOR
+                    ),
+                ],
+                spacing=0,
+                expand=True,
+            ),
             height=620,
             bgcolor=BACKGROUND_COLOR,
             border=ft.Border.all(1, "#333333"),
@@ -794,7 +896,10 @@ def main(page: ft.Page):
                 controls=[
                     ft.ListTile(
                         leading=ft.Icon(
-                            ft.Icons.INSERT_DRIVE_FILE_OUTLINED, size=16, color="#8B9EAF"),
+                            ft.Icons.INSERT_DRIVE_FILE_OUTLINED,
+                            size=16,
+                            color="#8B9EAF",
+                        ),
                         title=ft.Text(f.name, size=12, color="#C0C8D4"),
                         dense=True,
                     )
@@ -806,8 +911,7 @@ def main(page: ft.Page):
             panel = ft.ExpansionPanel(
                 bgcolor="#1A202E",
                 header=ft.ListTile(
-                    leading=ft.Icon(ft.Icons.FOLDER_OUTLINED,
-                                    color=ft.Colors.BLUE_400),
+                    leading=ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.BLUE_400),
                     title=ft.Text(
                         categoria.replace("_", " "),
                         size=14,
@@ -854,6 +958,7 @@ def main(page: ft.Page):
 
         def aplicar(e):
             if not config.destinyPath:
+
                 def seleccionar_y_cerrar(e):
                     dlg_destino.open = False
                     page.update()
@@ -865,12 +970,17 @@ def main(page: ft.Page):
 
                 dlg_destino = ft.AlertDialog(
                     modal=True,
-                    title=ft.Row(controls=[
-                        ft.Icon(ft.Icons.FOLDER_OPEN,
-                                color=ft.Colors.ORANGE, size=26),
-                        ft.Text("Carpeta de destino requerida",
-                                weight=ft.FontWeight.BOLD),
-                    ]),
+                    title=ft.Row(
+                        controls=[
+                            ft.Icon(
+                                ft.Icons.FOLDER_OPEN, color=ft.Colors.ORANGE, size=26
+                            ),
+                            ft.Text(
+                                "Carpeta de destino requerida",
+                                weight=ft.FontWeight.BOLD,
+                            ),
+                        ]
+                    ),
                     content=ft.Container(
                         content=ft.Text(
                             "Debes seleccionar una carpeta de destino antes de aplicar la organización.",
@@ -879,14 +989,20 @@ def main(page: ft.Page):
                         width=340,
                     ),
                     actions=[
-                        ft.TextButton("Cancelar", on_click=lambda e: (
-                            setattr(dlg_destino, "open", False), page.update())),
+                        ft.TextButton(
+                            "Cancelar",
+                            on_click=lambda e: (
+                                setattr(dlg_destino, "open", False),
+                                page.update(),
+                            ),
+                        ),
                         ft.FilledButton(
                             "Seleccionar carpeta",
                             icon=ft.Icons.FOLDER_OPEN,
                             on_click=seleccionar_y_cerrar,
                             style=ft.ButtonStyle(
-                                bgcolor=ft.Colors.BLUE_700, color=ft.Colors.WHITE),
+                                bgcolor=ft.Colors.BLUE_700, color=ft.Colors.WHITE
+                            ),
                         ),
                     ],
                     actions_alignment=ft.MainAxisAlignment.END,
@@ -897,9 +1013,12 @@ def main(page: ft.Page):
                 return
 
             import threading
+
             modo = modo_ref.current.value
 
             def run():
+                btn_aplicar_ref.current.disabled = True
+                btn_aplicar_ref.current.update()
                 progress_bar.value = 0
                 progress_bar.visible = True
                 progress_label.value = "Preparando..."
@@ -912,9 +1031,10 @@ def main(page: ft.Page):
                     # Actualizar barra ANTES de reemplazar el contenedor
                     progress_bar.update()
                     progress_label.update()
+                    btn_aplicar_ref.current.disabled = False
+                    btn_aplicar_ref.current.update()
                     # Recargar la preview (quedará vacía si no hay archivos)
-                    editContainerPreviewRef.current.content = viewPreviewPerfil(
-                        perfil)
+                    editContainerPreviewRef.current.content = viewPreviewPerfil(perfil)
                     editContainerPreviewRef.current.update()
                 except Exception as ex:
                     progress_label.value = f"\u274c Error: {ex}"
@@ -938,14 +1058,16 @@ def main(page: ft.Page):
                                             value="copiar",
                                             label="Copiar",
                                             label_style=ft.TextStyle(
-                                                size=13, color="#C0C8D4"),
+                                                size=13, color="#C0C8D4"
+                                            ),
                                             fill_color=ft.Colors.BLUE_400,
                                         ),
                                         ft.Radio(
                                             value="mover",
                                             label="Mover",
                                             label_style=ft.TextStyle(
-                                                size=13, color="#C0C8D4"),
+                                                size=13, color="#C0C8D4"
+                                            ),
                                             fill_color=ft.Colors.BLUE_400,
                                         ),
                                     ],
@@ -996,7 +1118,7 @@ def main(page: ft.Page):
                 ],
                 scroll=ft.ScrollMode.AUTO,
                 spacing=0,
-            )
+            ),
         )
 
     def tooglePreviewView(e, perfil, vistaEditar):
@@ -1014,6 +1136,7 @@ def main(page: ft.Page):
             editContainerPreviewRef.current.content = viewEditarPerfil(perfil)
         else:
             if editor_unsaved[0]:
+
                 def guardar_y_salir(ev):
                     dlg.open = False
                     page.update()
@@ -1030,31 +1153,42 @@ def main(page: ft.Page):
                     dlg.open = False
                     page.update()
 
-                nombre_perfil = perfil.replace(
-                    "config_", "").replace(".json", "")
+                nombre_perfil = perfil.replace("config_", "").replace(".json", "")
                 dlg = ft.AlertDialog(
                     modal=True,
-                    title=ft.Row(controls=[
-                        ft.Icon(ft.Icons.WARNING_ROUNDED,
-                                color=ft.Colors.ORANGE, size=26),
-                        ft.Text("Cambios sin guardar",
-                                weight=ft.FontWeight.BOLD),
-                    ]),
-                    content=ft.Container(
-                        content=ft.Column([
-                            ft.Text(f"El perfil ", size=13),
-                            ft.Container(
-                                content=ft.Text(nombre_perfil, size=14,
-                                                weight=ft.FontWeight.BOLD,
-                                                color=ft.Colors.BLUE_400),
-                                bgcolor=ft.Colors.with_opacity(
-                                    0.1, ft.Colors.BLUE),
-                                padding=ft.Padding(10, 6, 10, 6),
-                                border_radius=6,
+                    title=ft.Row(
+                        controls=[
+                            ft.Icon(
+                                ft.Icons.WARNING_ROUNDED,
+                                color=ft.Colors.ORANGE,
+                                size=26,
                             ),
-                            ft.Text("tiene cambios sin guardar. ¿Qué quieres hacer?",
-                                    size=13),
-                        ], spacing=6, tight=True),
+                            ft.Text("Cambios sin guardar", weight=ft.FontWeight.BOLD),
+                        ]
+                    ),
+                    content=ft.Container(
+                        content=ft.Column(
+                            [
+                                ft.Text(f"El perfil ", size=13),
+                                ft.Container(
+                                    content=ft.Text(
+                                        nombre_perfil,
+                                        size=14,
+                                        weight=ft.FontWeight.BOLD,
+                                        color=ft.Colors.BLUE_400,
+                                    ),
+                                    bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.BLUE),
+                                    padding=ft.Padding(10, 6, 10, 6),
+                                    border_radius=6,
+                                ),
+                                ft.Text(
+                                    "tiene cambios sin guardar. ¿Qué quieres hacer?",
+                                    size=13,
+                                ),
+                            ],
+                            spacing=6,
+                            tight=True,
+                        ),
                         width=340,
                     ),
                     actions=[
@@ -1069,7 +1203,8 @@ def main(page: ft.Page):
                             icon=ft.Icons.SAVE_OUTLINED,
                             on_click=guardar_y_salir,
                             style=ft.ButtonStyle(
-                                bgcolor=ft.Colors.BLUE_700, color=ft.Colors.WHITE),
+                                bgcolor=ft.Colors.BLUE_700, color=ft.Colors.WHITE
+                            ),
                         ),
                     ],
                     actions_alignment=ft.MainAxisAlignment.END,
@@ -1108,7 +1243,8 @@ def main(page: ft.Page):
                                 icon_color=ft.Colors.GREEN_400,
                                 tooltip="Editar perfil",
                                 on_click=lambda e, p=perfil: tooglePreviewView(
-                                    e, p, True),
+                                    e, p, True
+                                ),
                             ),
                             ft.IconButton(
                                 icon=ft.Icons.DELETE,
@@ -1116,7 +1252,8 @@ def main(page: ft.Page):
                                 icon_color=ft.Colors.RED_400,
                                 tooltip="Eliminar perfil",
                                 on_click=lambda e, p=perfil: dialogSeguroEliminarPerfil(
-                                    p),
+                                    p
+                                ),
                             ),
                         ],
                         spacing=0,  # ✅ Sin espacio entre botones
@@ -1175,8 +1312,7 @@ def main(page: ft.Page):
                                 ),
                                 bgcolor=ft.Colors.BLUE_400,
                                 border_radius=10,
-                                padding=ft.padding.symmetric(
-                                    horizontal=8, vertical=2),
+                                padding=ft.padding.symmetric(horizontal=8, vertical=2),
                             ),
                         ],
                         alignment=ft.MainAxisAlignment.START,
