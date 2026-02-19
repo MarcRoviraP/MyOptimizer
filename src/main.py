@@ -1,5 +1,5 @@
 from logging import root
-from main import Configuracion
+from utils import Configuracion
 import flet as ft
 from tkinter import filedialog
 import tkinter as tk
@@ -8,11 +8,12 @@ import shutil
 import os
 import json
 
+
 def main(page: ft.Page):
     nombreAPP = "My Optimizer"
     page.title = nombreAPP
     page.window.icon = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "myOptimizer.ico"
+        os.path.dirname(os.path.abspath(__file__)), "assets/myOptimizer.ico"
     )
 
     # COLORS
@@ -47,7 +48,8 @@ def main(page: ft.Page):
         return selectedDirectory
 
     async def pickFiles(e):
-        selectedDirectory = seleccionar_carpeta("Seleccionar carpeta de destino")
+        selectedDirectory = seleccionar_carpeta(
+            "Seleccionar carpeta de destino")
         config.setDestinyPath(selectedDirectory)
         destinyRef.current.value = (
             config.destinyPath if config.destinyPath else "Ninguna carpeta seleccionada"
@@ -258,7 +260,8 @@ def main(page: ft.Page):
         )
 
     def añadirCarpeta():
-        selectedDirectory = seleccionar_carpeta("Seleccionar carpeta para añadir")
+        selectedDirectory = seleccionar_carpeta(
+            "Seleccionar carpeta para añadir")
         if selectedDirectory:
             if config.addFolderToStructure(selectedDirectory):
                 foldersRef.current.controls.append(
@@ -270,7 +273,8 @@ def main(page: ft.Page):
         listaCarpetas = config.folderStructure
 
         # Crear las tarjetas dinámicas de las carpetas
-        carpeta_cards = [uiCustomFolderCard(carpeta) for carpeta in listaCarpetas]
+        carpeta_cards = [uiCustomFolderCard(
+            carpeta) for carpeta in listaCarpetas]
 
         # Tarjeta fija para "Agregar carpeta"
         agregar_card = ft.Card(
@@ -348,7 +352,8 @@ def main(page: ft.Page):
                     else None
                 )
                 control.border = (
-                    ft.border.all(2, ft.Colors.BLUE_400) if is_selected else None
+                    ft.border.all(
+                        2, ft.Colors.BLUE_400) if is_selected else None
                 )
                 control.shadow = (
                     ft.BoxShadow(
@@ -385,8 +390,10 @@ def main(page: ft.Page):
             modal=True,
             title=ft.Row(
                 controls=[
-                    ft.Icon(ft.Icons.WARNING_ROUNDED, color=ft.Colors.ORANGE, size=28),
-                    ft.Text("Confirmar eliminación", weight=ft.FontWeight.BOLD),
+                    ft.Icon(ft.Icons.WARNING_ROUNDED,
+                            color=ft.Colors.ORANGE, size=28),
+                    ft.Text("Confirmar eliminación",
+                            weight=ft.FontWeight.BOLD),
                 ]
             ),
             content=ft.Container(
@@ -402,7 +409,8 @@ def main(page: ft.Page):
                                 weight=ft.FontWeight.BOLD,
                                 color=ft.Colors.BLUE_700,
                             ),
-                            bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.BLUE),
+                            bgcolor=ft.Colors.with_opacity(
+                                0.1, ft.Colors.BLUE),
                             padding=ft.Padding(10, 10, 10, 10),
                             border_radius=8,
                             margin=ft.Margin(0, 10, 0, 10),
@@ -442,7 +450,8 @@ def main(page: ft.Page):
     def onDeletePerfil(e, perfil):
         print(f"🗑️ Eliminando perfil: {perfil}")
         perfilABorrarPath = os.path.join(config.RUTA_CONFIG, perfil)
-        if not perfilABorrarPath: return
+        if not perfilABorrarPath:
+            return
         try:
             os.remove(perfilABorrarPath)
         except:
@@ -527,7 +536,8 @@ def main(page: ft.Page):
                                 icon_size=10,
                                 icon_color="#667788",
                                 tooltip="Quitar",
-                                on_click=lambda e, c=cat, x=ext: remove_ext(c, x),
+                                on_click=lambda e, c=cat, x=ext: remove_ext(
+                                    c, x),
                                 width=20,
                                 height=20,
                             ),
@@ -556,7 +566,8 @@ def main(page: ft.Page):
                     row.controls.append(make_chip(e, cat))
             else:
                 row.controls.append(
-                    ft.Text("sin extensiones", size=11, italic=True, color="#556677")
+                    ft.Text("sin extensiones", size=11,
+                            italic=True, color="#556677")
                 )
             row.update()
             ref["badge"].value = str(len(exts))
@@ -635,10 +646,12 @@ def main(page: ft.Page):
 
         def save(e):
             try:
-                contenido = json.dumps(perfilData, indent=2, ensure_ascii=False)
+                contenido = json.dumps(
+                    perfilData, indent=2, ensure_ascii=False)
                 with open(ruta_json, "w", encoding="utf-8") as f:
                     f.write(contenido)
-                local = os.path.join(os.path.dirname(os.path.abspath(__file__)), perfil)
+                local = os.path.join(os.path.dirname(
+                    os.path.abspath(__file__)), perfil)
                 if os.path.exists(local):
                     with open(local, "w", encoding="utf-8") as f:
                         f.write(contenido)
@@ -697,10 +710,12 @@ def main(page: ft.Page):
                 border_radius=4,
                 width=80,
                 height=30,
-                on_submit=lambda e, c=cat: add_ext(c, e.control.value, e.control),
+                on_submit=lambda e, c=cat: add_ext(
+                    c, e.control.value, e.control),
             )
 
-            cat_refs[cat] = {"ext_row": ext_row, "badge": badge_txt, "input": ext_inp}
+            cat_refs[cat] = {"ext_row": ext_row,
+                             "badge": badge_txt, "input": ext_inp}
 
             body = ft.Container(
                 content=ft.Column(
@@ -920,7 +935,8 @@ def main(page: ft.Page):
             panel = ft.ExpansionPanel(
                 bgcolor="#1A202E",
                 header=ft.ListTile(
-                    leading=ft.Icon(ft.Icons.FOLDER_OUTLINED, color=ft.Colors.BLUE_400),
+                    leading=ft.Icon(ft.Icons.FOLDER_OUTLINED,
+                                    color=ft.Colors.BLUE_400),
                     title=ft.Text(
                         categoria.replace("_", " "),
                         size=14,
@@ -971,7 +987,8 @@ def main(page: ft.Page):
                 def seleccionar_y_cerrar(e):
                     dlg_destino.open = False
                     page.update()
-                    selectedDirectory = seleccionar_carpeta("Seleccionar carpeta de destino")
+                    selectedDirectory = seleccionar_carpeta(
+                        "Seleccionar carpeta de destino")
                     if selectedDirectory:
                         config.setDestinyPath(selectedDirectory)
                         destinyRef.current.value = selectedDirectory
@@ -1043,7 +1060,8 @@ def main(page: ft.Page):
                     btn_aplicar_ref.current.disabled = False
                     btn_aplicar_ref.current.update()
                     # Recargar la preview (quedará vacía si no hay archivos)
-                    editContainerPreviewRef.current.content = viewPreviewPerfil(perfil)
+                    editContainerPreviewRef.current.content = viewPreviewPerfil(
+                        perfil)
                     editContainerPreviewRef.current.update()
                 except Exception as ex:
                     progress_label.value = f"\u274c Error: {ex}"
@@ -1162,7 +1180,8 @@ def main(page: ft.Page):
                     dlg.open = False
                     page.update()
 
-                nombre_perfil = perfil.replace("config_", "").replace(".json", "")
+                nombre_perfil = perfil.replace(
+                    "config_", "").replace(".json", "")
                 dlg = ft.AlertDialog(
                     modal=True,
                     title=ft.Row(
@@ -1172,7 +1191,8 @@ def main(page: ft.Page):
                                 color=ft.Colors.ORANGE,
                                 size=26,
                             ),
-                            ft.Text("Cambios sin guardar", weight=ft.FontWeight.BOLD),
+                            ft.Text("Cambios sin guardar",
+                                    weight=ft.FontWeight.BOLD),
                         ]
                     ),
                     content=ft.Container(
@@ -1186,7 +1206,8 @@ def main(page: ft.Page):
                                         weight=ft.FontWeight.BOLD,
                                         color=ft.Colors.BLUE_400,
                                     ),
-                                    bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.BLUE),
+                                    bgcolor=ft.Colors.with_opacity(
+                                        0.1, ft.Colors.BLUE),
                                     padding=ft.Padding(10, 6, 10, 6),
                                     border_radius=6,
                                 ),
@@ -1264,7 +1285,7 @@ def main(page: ft.Page):
                                 on_click=lambda e, p=perfil: dialogSeguroEliminarPerfil(
                                     p
                                 ),
-                                
+
                             ),
                         ],
                         spacing=0,  # ✅ Sin espacio entre botones
@@ -1323,7 +1344,8 @@ def main(page: ft.Page):
                                 ),
                                 bgcolor=ft.Colors.BLUE_400,
                                 border_radius=10,
-                                padding=ft.padding.symmetric(horizontal=8, vertical=2),
+                                padding=ft.padding.symmetric(
+                                    horizontal=8, vertical=2),
                             ),
                         ],
                         alignment=ft.MainAxisAlignment.START,
@@ -1351,7 +1373,8 @@ def main(page: ft.Page):
             return
 
         shutil.copy(
-            "config_Optimizador.json",
+            os.path.join(os.path.dirname(os.path.abspath(
+                __file__)), "config_Optimizador.json"),
             os.path.join(config.RUTA_CONFIG, f"config_{nombre}.json"),
         )
         profilesRef.current.controls[1].controls.append(
@@ -1449,4 +1472,9 @@ def main(page: ft.Page):
 
 
 if __name__ == "__main__":
-    ft.app(target=main, assets_dir=os.path.dirname(os.path.abspath(__file__)))
+    assets = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
+    ft.run(
+        main=main,
+        assets_dir=assets
+    )
+

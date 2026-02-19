@@ -1,0 +1,28 @@
+[project]
+name = "My Optimizer"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "MarcRoviraP", email = "marcrovira2eso1@gmail.com" }
+]
+dependencies = [
+    "flet>=0.80.5"
+]
+
+[dependency-groups]
+dev = [
+    "flet-cli>=0.80.5",
+    "flet-desktop>=0.80.5",
+    "flet-web>=0.80.5",
+]
+
+[tool.flet]
+org = "com.MarcRoviraP"
+product = "MyOptimizer"
+company = "MarcRoviraP"
+copyright = "Copyright (C) 2026 by MarcRoviraP"
+
+[tool.flet.app]
+path = "src"

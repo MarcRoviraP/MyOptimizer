@@ -24,8 +24,11 @@ class Configuracion:
             os.makedirs(self.RUTA_CONFIG)
         if not os.path.exists(os.path.join(self.RUTA_CONFIG, "config_Optimizador")):
 
-            shutil.copy("config_Optimizador.json", self.RUTA_CONFIG)
-
+            shutil.copy(
+                os.path.join(os.path.dirname(os.path.abspath(
+                    __file__)), "config_Optimizador.json"),
+                self.RUTA_CONFIG,
+            )
     def setDestinyPath(self, path):
         self.destinyPath = path
         print(self.destinyPath)
