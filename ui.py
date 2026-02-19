@@ -8,7 +8,6 @@ import shutil
 import os
 import json
 
-
 def main(page: ft.Page):
     nombreAPP = "My Optimizer"
     page.title = nombreAPP
@@ -28,26 +27,27 @@ def main(page: ft.Page):
     nombrePerfil = ft.Ref[ft.TextField]()
     contadorPerfilesRef = ft.Ref[ft.Text]()
     editContainerPreviewRef = ft.Ref[ft.Container]()
+    deleteButtonRef = ft.Ref[ft.IconButton]()
 
     # [flag, save_fn] — viewEditarPerfil los actualiza; tooglePreviewView los lee
     editor_unsaved = [False, None]
 
     profileSelected = config.getProfiles()[0] if config.getProfiles() else None
 
-    def seleccionar_carpeta():
+    def seleccionar_carpeta(title):
         root = tk.Tk()
         root.withdraw()  # Oculta la ventana principal
         root.attributes("-topmost", True)  # 👈 Siempre arriba
 
         selectedDirectory = filedialog.askdirectory(
-            parent=root, title="Seleccionar carpeta"
+            parent=root, title=title,
         )
 
         root.destroy()
         return selectedDirectory
 
     async def pickFiles(e):
-        selectedDirectory = seleccionar_carpeta()
+        selectedDirectory = seleccionar_carpeta("Seleccionar carpeta de destino")
         config.setDestinyPath(selectedDirectory)
         destinyRef.current.value = (
             config.destinyPath if config.destinyPath else "Ninguna carpeta seleccionada"
@@ -258,7 +258,7 @@ def main(page: ft.Page):
         )
 
     def añadirCarpeta():
-        selectedDirectory = seleccionar_carpeta()
+        selectedDirectory = seleccionar_carpeta("Seleccionar carpeta para añadir")
         if selectedDirectory:
             if config.addFolderToStructure(selectedDirectory):
                 foldersRef.current.controls.append(
@@ -367,6 +367,8 @@ def main(page: ft.Page):
         tooglePreviewView(None, perfil, False)
 
     def dialogSeguroEliminarPerfil(perfil):
+        deleteButtonRef.current.disabled = True
+        deleteButtonRef.current.update()
         nombre_perfil = perfil.replace("config_", "").replace(".json", "")
         print(f"⚠️ Confirmar eliminación del perfil: {nombre_perfil}")
 
@@ -434,10 +436,17 @@ def main(page: ft.Page):
         page.overlay.append(dlg)  # ✅ Agregar al overlay
         dlg.open = True  # ✅ Abrir
         page.update()  # ✅ Actualizar
+        deleteButtonRef.current.disabled = False
+        deleteButtonRef.current.update()
 
     def onDeletePerfil(e, perfil):
         print(f"🗑️ Eliminando perfil: {perfil}")
-        os.remove(os.path.join(config.RUTA_CONFIG, perfil))
+        perfilABorrarPath = os.path.join(config.RUTA_CONFIG, perfil)
+        if not perfilABorrarPath: return
+        try:
+            os.remove(perfilABorrarPath)
+        except:
+            return
         # Eliminar de la UI
         profilesRef.current.controls[1].controls = [
             c
@@ -962,7 +971,7 @@ def main(page: ft.Page):
                 def seleccionar_y_cerrar(e):
                     dlg_destino.open = False
                     page.update()
-                    selectedDirectory = seleccionar_carpeta()
+                    selectedDirectory = seleccionar_carpeta("Seleccionar carpeta de destino")
                     if selectedDirectory:
                         config.setDestinyPath(selectedDirectory)
                         destinyRef.current.value = selectedDirectory
@@ -1247,6 +1256,7 @@ def main(page: ft.Page):
                                 ),
                             ),
                             ft.IconButton(
+                                ref=deleteButtonRef,
                                 icon=ft.Icons.DELETE,
                                 icon_size=18,
                                 icon_color=ft.Colors.RED_400,
@@ -1254,6 +1264,7 @@ def main(page: ft.Page):
                                 on_click=lambda e, p=perfil: dialogSeguroEliminarPerfil(
                                     p
                                 ),
+                                
                             ),
                         ],
                         spacing=0,  # ✅ Sin espacio entre botones
