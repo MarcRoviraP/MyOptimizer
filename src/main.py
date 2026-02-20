@@ -1,4 +1,3 @@
-from logging import root
 from utils import Configuracion
 import flet as ft
 from tkinter import filedialog
@@ -12,6 +11,8 @@ import json
 def main(page: ft.Page):
     nombreAPP = "My Optimizer"
     page.title = nombreAPP
+    page.window.resizable = False
+    page.window.maximizable = False
     page.window.icon = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "assets/myOptimizer.ico"
     )
@@ -75,46 +76,18 @@ def main(page: ft.Page):
                                     content=ft.Row(
                                         controls=[
                                             ft.Icon(
-                                                ft.Icons.SETTINGS,
+                                                ft.Icons.FOLDER_OPEN,
                                                 color=ft.Colors.BLUE,
                                                 size=30,
                                             ),
                                             ft.Text(
-                                                "Configuración del sistema",
+                                                "Configuración de carpetas",
                                                 size=18,
                                                 weight=ft.FontWeight.BOLD,
                                             ),
                                         ]
                                     )
-                                ),
-                                ft.Card(
-                                    elevation=2,
-                                    bgcolor="#3000FF40",
-                                    shape=ft.RoundedRectangleBorder(radius=10),
-                                    content=ft.Container(
-                                        padding=ft.padding.symmetric(
-                                            horizontal=12, vertical=6
-                                        ),
-                                        content=ft.Row(
-                                            spacing=8,
-                                            alignment=ft.MainAxisAlignment.CENTER,
-                                            controls=[
-                                                ft.Container(
-                                                    width=10,
-                                                    height=10,
-                                                    bgcolor=ft.Colors.GREEN,
-                                                    border_radius=50,
-                                                ),
-                                                ft.Text(
-                                                    "Active",
-                                                    color=ft.Colors.GREEN,
-                                                    size=16,
-                                                    weight=ft.FontWeight.BOLD,
-                                                ),
-                                            ],
-                                        ),
-                                    ),
-                                ),
+                                )
                             ],
                         ),
                         ft.Divider(),
@@ -268,6 +241,8 @@ def main(page: ft.Page):
                     uiCustomFolderCard(selectedDirectory)
                 )
                 foldersRef.current.update()
+                editContainerPreviewRef.current.content = None
+                page.update()
 
     def folderOrganizerUI():
         listaCarpetas = config.folderStructure
@@ -320,15 +295,19 @@ def main(page: ft.Page):
             expand=True,  # que ocupe todo el espacio disponible
             height=400,  # altura fija para el GridView
             padding=ft.padding.all(10),
-            content=ft.GridView(
-                ref=foldersRef,
-                runs_count=None,  # permite que las columnas se ajusten al ancho disponible
-                max_extent=180,  # ancho máximo por tarjeta
-                spacing=8,
-                run_spacing=8,
-                controls=todas_las_cards,
-                expand=True,  # que el GridView crezca con el contenedor
-            ),
+            content=ft.Column(controls=[
+                ft.Text("Carpetas a organizar", size=16,
+                        weight=ft.FontWeight.BOLD),
+                ft.GridView(
+                    ref=foldersRef,
+                    runs_count=None,  # permite que las columnas se ajusten al ancho disponible
+                    max_extent=180,  # ancho máximo por tarjeta
+                    spacing=8,
+                    run_spacing=8,
+                    controls=todas_las_cards,
+                    expand=True,  # que el GridView crezca con el contenedor
+                ),
+            ])
         )
 
     def onPerfilClick(e, perfil):
@@ -910,12 +889,19 @@ def main(page: ft.Page):
         editor_unsaved[1] = save
         return resultado
 
-    def viewPreviewPerfil(perfil):
+    def viewPreviewPerfil(perfil, loop=None):
 
         data = config.getStructureFolder()
 
         panels = []
+        # categoria → Ref del Container del header
+        panel_refs: dict[str, ft.Ref] = {}
+
         for categoria, archivos in data.items():
+            icon_ref = ft.Ref[ft.Icon]()
+            header_ref = ft.Ref[ft.Container]()
+            panel_refs[categoria] = (icon_ref, header_ref)
+
             panel_content = ft.Column(
                 controls=[
                     ft.ListTile(
@@ -934,19 +920,26 @@ def main(page: ft.Page):
 
             panel = ft.ExpansionPanel(
                 bgcolor="#1A202E",
-                header=ft.ListTile(
-                    leading=ft.Icon(ft.Icons.FOLDER_OUTLINED,
-                                    color=ft.Colors.BLUE_400),
-                    title=ft.Text(
-                        categoria.replace("_", " "),
-                        size=14,
-                        weight=ft.FontWeight.W_500,
-                        color="#C0C8D4",
-                    ),
-                    trailing=ft.Text(
-                        str(len(archivos)),
-                        size=12,
-                        color="#8B9EAF",
+                header=ft.Container(
+                    ref=header_ref,
+                    border_radius=ft.BorderRadius(6, 6, 0, 0),
+                    content=ft.ListTile(
+                        leading=ft.Icon(
+                            ft.Icons.FOLDER_OUTLINED,
+                            color=ft.Colors.BLUE_400,
+                            ref=icon_ref,
+                        ),
+                        title=ft.Text(
+                            categoria.replace("_", " "),
+                            size=14,
+                            weight=ft.FontWeight.W_500,
+                            color="#C0C8D4",
+                        ),
+                        trailing=ft.Text(
+                            str(len(archivos)),
+                            size=12,
+                            color="#8B9EAF",
+                        ),
                     ),
                 ),
                 content=ft.Container(
@@ -966,20 +959,59 @@ def main(page: ft.Page):
 
         modo_ref = ft.Ref[ft.RadioGroup]()
         btn_aplicar_ref = ft.Ref[ft.FilledButton]()
-        progress_bar = ft.ProgressBar(
-            value=0,
-            width=float("inf"),
-            color=ft.Colors.BLUE_400,
-            bgcolor="#1A202E",
-            visible=False,
-        )
-        progress_label = ft.Text("", size=11, color="#8B9EAF", italic=True)
+
+        if loop is None:
+            import asyncio
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                loop = None
+
+        _loop = loop
+
+        def _ui_update(fn):
+            """Despacha una función al event loop de Flet desde cualquier thread."""
+            if _loop is not None:
+                _loop.call_soon_threadsafe(fn)
+                _loop.call_soon_threadsafe(page.update)
+            else:
+                fn()
+                page.update()
+
+        ultimo_procesado: list[str] = []  # [0] = categoria anterior
+
+        def _marcar_done(categoria):
+            refs = panel_refs.get(categoria)
+            if refs:
+                icon_ref, header_ref = refs
+                if icon_ref.current:
+                    icon_ref.current.name = ft.Icons.CHECK_CIRCLE_ROUNDED
+                    icon_ref.current.color = ft.Colors.GREEN_400
+                if header_ref.current:
+                    header_ref.current.bgcolor = ft.Colors.with_opacity(
+                        0.08, ft.Colors.GREEN)
+
+        def _marcar_en_progreso(categoria):
+            refs = panel_refs.get(categoria)
+            if refs:
+                icon_ref, header_ref = refs
+                if icon_ref.current:
+                    icon_ref.current.name = ft.Icons.FOLDER_OPEN
+                    icon_ref.current.color = ft.Colors.AMBER_400
+                if header_ref.current:
+                    header_ref.current.bgcolor = ft.Colors.with_opacity(
+                        0.1, ft.Colors.AMBER)
 
         def on_progress(categoria, idx, total):
-            progress_bar.value = idx / total
-            progress_label.value = f"{'Copiando' if modo_ref.current.value == 'copiar' else 'Moviendo'} · {categoria.replace('_', ' ')} ({idx}/{total})"
-            progress_bar.update()
-            progress_label.update()
+            def _apply():
+                # Marcar la anterior como ✅ verde
+                if ultimo_procesado:
+                    _marcar_done(ultimo_procesado[0])
+                ultimo_procesado.clear()
+                ultimo_procesado.append(categoria)
+                # Marcar la actual como 🟡 en progreso
+                _marcar_en_progreso(categoria)
+            _ui_update(_apply)
 
         def aplicar(e):
             if not config.destinyPath:
@@ -1038,38 +1070,33 @@ def main(page: ft.Page):
                 page.update()
                 return
 
-            import threading
-
             modo = modo_ref.current.value
 
-            def run():
-                btn_aplicar_ref.current.disabled = True
-                btn_aplicar_ref.current.update()
-                progress_bar.value = 0
-                progress_bar.visible = True
-                progress_label.value = "Preparando..."
-                progress_bar.update()
-                progress_label.update()
-                try:
-                    config.applyOrganization(modo, on_progress=on_progress)
-                    progress_label.value = f"\u2705 {'Copiado' if modo == 'copiar' else 'Movido'} correctamente"
-                    progress_bar.value = 1
-                    # Actualizar barra ANTES de reemplazar el contenedor
-                    progress_bar.update()
-                    progress_label.update()
-                    btn_aplicar_ref.current.disabled = False
-                    btn_aplicar_ref.current.update()
-                    # Recargar la preview (quedará vacía si no hay archivos)
-                    editContainerPreviewRef.current.content = viewPreviewPerfil(
-                        perfil)
-                    editContainerPreviewRef.current.update()
-                except Exception as ex:
-                    progress_label.value = f"\u274c Error: {ex}"
-                    progress_bar.visible = False
-                    progress_bar.update()
-                    progress_label.update()
+            async def run_async():
+                import asyncio
+                _aloop = asyncio.get_running_loop()
 
-            threading.Thread(target=run, daemon=True).start()
+                btn_aplicar_ref.current.disabled = True
+                page.update()
+                try:
+                    # Ejecutar el trabajo bloqueante en thread pool
+                    await asyncio.to_thread(
+                        config.applyOrganization, modo, on_progress
+                    )
+                    # Marcar la última categoría como ✅ done
+                    if ultimo_procesado:
+                        _marcar_done(ultimo_procesado[0])
+                    btn_aplicar_ref.current.disabled = False
+                    page.update()
+                    # Recargar la preview
+                    editContainerPreviewRef.current.content = None
+                    page.update()
+                except Exception as ex:
+                    print(f"❌ Error al aplicar: {ex}")
+                    btn_aplicar_ref.current.disabled = False
+                    page.update()
+
+            page.run_task(run_async)
 
         toolbar = ft.Container(
             content=ft.Column(
@@ -1121,8 +1148,6 @@ def main(page: ft.Page):
                         vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         spacing=8,
                     ),
-                    progress_bar,
-                    progress_label,
                 ],
                 spacing=4,
             ),
@@ -1150,12 +1175,43 @@ def main(page: ft.Page):
 
     def tooglePreviewView(e, perfil, vistaEditar):
 
-        def do_switch_to_preview():
+        async def do_switch_to_preview():
+            import asyncio
             editor_unsaved[0] = False
             editor_unsaved[1] = None
+
+            # ── Mostrar loading inmediatamente ───────────────────────────────
+            loading = ft.Container(
+                expand=True,
+                alignment=ft.Alignment(0, 0),
+                content=ft.Column(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=16,
+                    controls=[
+                        ft.ProgressRing(
+                            width=40, height=40,
+                            color=ft.Colors.BLUE_400,
+                            stroke_width=3,
+                        ),
+                        ft.Text(
+                            "Analizando archivos...",
+                            size=13,
+                            color="#8B9EAF",
+                            italic=True,
+                        ),
+                    ],
+                ),
+            )
+            editContainerPreviewRef.current.content = loading
+            page.update()
+
+            # ── Construir preview en background (thread pool) ─────────────────
             print(f"🔍 Vista previa del perfil: {perfil}")
-            editContainerPreviewRef.current.content = viewPreviewPerfil(perfil)
-            editContainerPreviewRef.current.update()
+            _loop = asyncio.get_running_loop()
+            vista = await asyncio.to_thread(viewPreviewPerfil, perfil, _loop)
+            editContainerPreviewRef.current.content = vista
+            page.update()
 
         if vistaEditar:
             editor_unsaved[0] = False
@@ -1169,12 +1225,12 @@ def main(page: ft.Page):
                     page.update()
                     if editor_unsaved[1]:
                         editor_unsaved[1](ev)
-                    do_switch_to_preview()
+                    page.run_task(do_switch_to_preview)
 
                 def descartar_y_salir(ev):
                     dlg.open = False
                     page.update()
-                    do_switch_to_preview()
+                    page.run_task(do_switch_to_preview)
 
                 def cancelar(ev):
                     dlg.open = False
@@ -1244,7 +1300,7 @@ def main(page: ft.Page):
                 page.update()
                 return
 
-            do_switch_to_preview()
+            page.run_task(do_switch_to_preview)
 
     def createProfileUI(perfil):
         return ft.Container(
@@ -1270,7 +1326,7 @@ def main(page: ft.Page):
                             ft.IconButton(
                                 icon=ft.Icons.EDIT,
                                 icon_size=18,
-                                icon_color=ft.Colors.GREEN_400,
+                                icon_color=ft.Colors.WHITE,
                                 tooltip="Editar perfil",
                                 on_click=lambda e, p=perfil: tooglePreviewView(
                                     e, p, True
@@ -1366,7 +1422,9 @@ def main(page: ft.Page):
         nombre = nombrePerfil.current.value.strip()
         if not nombre:
             return
-
+        nombre = nombre[:100]
+        nombrePerfil.current.value = ""
+        nombrePerfil.current.update()
         perfiles = config.getProfiles()
         if f"config_{nombre}.json" in perfiles:
             print("⚠️ Ya existe un perfil con ese nombre.")
@@ -1407,6 +1465,7 @@ def main(page: ft.Page):
                                     bgcolor=BACKGROUND_COLOR_TERMINAL,
                                     border=ft.border.all(2, "#333333"),
                                     ref=nombrePerfil,
+                                    max_length=100,
                                 ),
                                 ft.IconButton(
                                     ft.Icons.ADD, bgcolor="#2B6CEE", on_click=addProfile
@@ -1477,4 +1536,3 @@ if __name__ == "__main__":
         main=main,
         assets_dir=assets
     )
-

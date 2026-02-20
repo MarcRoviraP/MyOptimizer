@@ -2,6 +2,7 @@ from platformdirs import user_data_dir
 import os
 import json
 import shutil
+import hashlib
 from pathlib import Path
 from collections import defaultdict
 
@@ -29,6 +30,7 @@ class Configuracion:
                     __file__)), "config_Optimizador.json"),
                 self.RUTA_CONFIG,
             )
+
     def setDestinyPath(self, path):
         self.destinyPath = path
         print(self.destinyPath)
@@ -100,22 +102,75 @@ class Configuracion:
             for ext in extensiones
         }
 
-        finalFolder = defaultdict(list)
+        # ── Paso 1: recopilar candidatos (solo stat, sin leer disco) ─────────
+        candidatos = []  # [(Path, categoria)]
+        for ruta in self.folderStructure:
+            for f in Path(ruta).iterdir():
+                if f.is_file():
+                    ext = f.suffix.lower().lstrip(".")
+                    cat = mapa_extensiones.get(ext)
+                    if cat:
+                        candidatos.append((f, cat))
+
+        # ── Paso 2: agrupar por tamaño (sin leer contenido) ─────────────────
+        por_tamanyo: dict[int, list] = defaultdict(list)
+        for f, cat in candidatos:
+            por_tamanyo[f.stat().st_size].append((f, cat))
+
+        # ── Helpers de hash ──────────────────────────────────────────────────
+        def _hash_parcial(path: Path) -> str:
+            """Hash de los primeros 64 KB — descarta el 99% de falsos positivos."""
+            h = hashlib.sha256()
+            with open(path, "rb") as fh:
+                h.update(fh.read(65536))
+            return h.hexdigest()
+
+        def _hash_completo(path: Path) -> str:
+            h = hashlib.sha256()
+            with open(path, "rb") as fh:
+                for chunk in iter(lambda: fh.read(65536), b""):
+                    h.update(chunk)
+            return h.hexdigest()
+
+        # ── Paso 3: deduplicar y construir resultado ─────────────────────────
+        finalFolder: dict[str, list] = defaultdict(list)
+        seen_full: set[str] = set()   # hashes completos confirmados
         lock = threading.Lock()
 
-        def tarea(ruta):
-            ruta = Path(ruta)
+        def procesar_grupo(grupo):
+            """Procesa un grupo de archivos del mismo tamaño."""
+            if len(grupo) == 1:
+                # Único archivo de ese tamaño → imposible que sea duplicado
+                f, cat = grupo[0]
+                with lock:
+                    finalFolder[cat].append(f)
+                return
 
-            for f in ruta.iterdir():
-                if f.is_file():
-                    extension = f.suffix.lower().lstrip(".")
-                    categoria = mapa_extensiones.get(extension)
-                    if categoria:
-                        with lock:  # ← protege el append compartido
-                            finalFolder[categoria].append(f)
+            # Hay ≥2 archivos del mismo tamaño → comparar hash parcial primero
+            por_parcial: dict[str, list] = defaultdict(list)
+            for f, cat in grupo:
+                por_parcial[_hash_parcial(f)].append((f, cat))
 
+            for parciales in por_parcial.values():
+                if len(parciales) == 1:
+                    # Hash parcial único → no hay duplicado real
+                    f, cat = parciales[0]
+                    with lock:
+                        finalFolder[cat].append(f)
+                else:
+                    # Colisión de hash parcial → verificar con hash completo
+                    for f, cat in parciales:
+                        full = _hash_completo(f)
+                        with lock:
+                            if full in seen_full:
+                                print(f"🗑️ Duplicado ignorado: {f.name}")
+                                continue
+                            seen_full.add(full)
+                            finalFolder[cat].append(f)
+
+        grupos = list(por_tamanyo.values())
         with ThreadPoolExecutor() as executor:
-            executor.map(tarea, self.folderStructure)  # ← un hilo por ruta
+            executor.map(procesar_grupo, grupos)
 
         return finalFolder
         '''for clave in finalFolder:
