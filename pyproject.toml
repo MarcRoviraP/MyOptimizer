@@ -1,6 +1,6 @@
 [project]
 name = "MyOptimizer"
-version = "0.1.0"
+version = "1.0.0"
 description = "File optimization and management tool"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -9,8 +9,13 @@ authors = [
 ]
 dependencies = [
     "flet>=0.80.5",
-    "platformdirs>=4.7.0"
+    "platformdirs>=4.7.0",
+    "pyperclip>=1.11.0"
 ]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [tool.flet]
 org = "com.MarcRoviraP"
@@ -20,4 +25,10 @@ copyright = "Copyright (C) 2026 by MarcRoviraP"
 
 [tool.flet.app]
 path = "src"
-assets = "assets"
+module = "main"
+
+[tool.flet.windows]
+include = ["tkinter", "tcl", "tk"]
+icon = "src/assets/myOptimizer.ico"
+file_version = "1.0.0.0"
+product_version = "1.0.0.0"

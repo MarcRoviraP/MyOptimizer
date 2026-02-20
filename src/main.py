@@ -451,6 +451,163 @@ def main(page: ft.Page):
         contadorPerfilesRef.current.update()
         profilesRef.current.update()
 
+    def dialogClonarPerfil(perfil):
+        """Abre un dialog para clonar el perfil con un nombre único."""
+        nombre_origen = perfil.replace("config_", "").replace(".json", "")
+        clone_input = ft.TextField(
+            hint_text="Nombre del nuevo perfil",
+            autofocus=True,
+            bgcolor=BACKGROUND_COLOR_TERMINAL,
+            border=ft.border.all(2, "#333333"),
+            focused_border_color="#4C8BF5",
+            color="#E0E6ED",
+            max_length=100,
+        )
+        error_text = ft.Text("", color=ft.Colors.RED_400, size=12)
+
+        def confirmar_clon(e):
+            nuevo_nombre = clone_input.value.strip()[:100]
+            if not nuevo_nombre:
+                error_text.value = "El nombre no puede estar vacío."
+                error_text.update()
+                return
+            nuevo_archivo = f"config_{nuevo_nombre}.json"
+            if nuevo_archivo in config.getProfiles():
+                error_text.value = f"Ya existe un perfil llamado '{nuevo_nombre}'."
+                error_text.update()
+                return
+            shutil.copy(
+                os.path.join(config.RUTA_CONFIG, perfil),
+                os.path.join(config.RUTA_CONFIG, nuevo_archivo),
+            )
+            profilesRef.current.controls[1].controls.append(
+                createProfileUI(nuevo_archivo)
+            )
+            contadorPerfilesRef.current.value = str(
+                int(contadorPerfilesRef.current.value) + 1
+            )
+            contadorPerfilesRef.current.update()
+            profilesRef.current.update()
+            dlg_clon.open = False
+            page.update()
+
+        def cerrar_clon(e):
+            dlg_clon.open = False
+            page.update()
+
+        dlg_clon = ft.AlertDialog(
+            modal=True,
+            title=ft.Row(
+                controls=[
+                    ft.Icon(ft.Icons.COPY, color=ft.Colors.BLUE_400, size=24),
+                    ft.Text("Clonar perfil", weight=ft.FontWeight.BOLD),
+                ]
+            ),
+            content=ft.Container(
+                width=360,
+                content=ft.Column(
+                    controls=[
+                        ft.Text(
+                            f"Clonando: {nombre_origen}",
+                            size=13,
+                            color="#8B9EAF",
+                            italic=True,
+                        ),
+                        ft.Container(height=6),
+                        clone_input,
+                        error_text,
+                    ],
+                    tight=True,
+                    spacing=6,
+                ),
+            ),
+            actions=[
+                ft.TextButton("Cancelar", on_click=cerrar_clon),
+                ft.FilledButton(
+                    "Clonar",
+                    icon=ft.Icons.COPY_ALL,
+                    on_click=confirmar_clon,
+                ),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.overlay.append(dlg_clon)
+        dlg_clon.open = True
+        page.update()
+
+    def dialogRenombrarPerfil(perfil, tile_title_ref):
+        """Abre un dialog para renombrar un perfil. tile_title_ref es el ft.Text del ListTile."""
+        nombre_actual = perfil.replace("config_", "").replace(".json", "")
+        rename_input = ft.TextField(
+            value=nombre_actual,
+            autofocus=True,
+            bgcolor=BACKGROUND_COLOR_TERMINAL,
+            border=ft.border.all(2, "#333333"),
+            focused_border_color="#4C8BF5",
+            color="#E0E6ED",
+            max_length=100,
+        )
+        error_text = ft.Text("", color=ft.Colors.RED_400, size=12)
+
+        def confirmar_rename(e):
+            nuevo_nombre = rename_input.value.strip()[:100]
+            if not nuevo_nombre or nuevo_nombre == nombre_actual:
+                dlg_rename.open = False
+                page.update()
+                return
+            nuevo_archivo = f"config_{nuevo_nombre}.json"
+            if nuevo_archivo in config.getProfiles():
+                error_text.value = f"Ya existe un perfil llamado '{nuevo_nombre}'."
+                error_text.update()
+                return
+            os.rename(
+                os.path.join(config.RUTA_CONFIG, perfil),
+                os.path.join(config.RUTA_CONFIG, nuevo_archivo),
+            )
+            # Actualizar el texto del tile en la lista sin reconstruir
+            tile_title_ref.value = nuevo_nombre
+            tile_title_ref.update()
+            dlg_rename.open = False
+            page.update()
+
+        def cerrar_rename(e):
+            dlg_rename.open = False
+            page.update()
+
+        dlg_rename = ft.AlertDialog(
+            modal=True,
+            title=ft.Row(
+                controls=[
+                    ft.Icon(ft.Icons.DRIVE_FILE_RENAME_OUTLINE,
+                            color=ft.Colors.BLUE_400, size=24),
+                    ft.Text("Renombrar perfil", weight=ft.FontWeight.BOLD),
+                ]
+            ),
+            content=ft.Container(
+                width=360,
+                content=ft.Column(
+                    controls=[
+                        rename_input,
+                        error_text,
+                    ],
+                    tight=True,
+                    spacing=6,
+                ),
+            ),
+            actions=[
+                ft.TextButton("Cancelar", on_click=cerrar_rename),
+                ft.FilledButton(
+                    "Renombrar",
+                    icon=ft.Icons.CHECK,
+                    on_click=confirmar_rename,
+                ),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        page.overlay.append(dlg_rename)
+        dlg_rename.open = True
+        page.update()
+
     def viewEditarPerfil(perfil):
         ACCENT = "#4C8BF5"
         ACCENT_LIGHT = "#1A2A4A"
@@ -804,6 +961,58 @@ def main(page: ft.Page):
         for i, (c, exts) in enumerate(perfilData.items()):
             tree_col.controls.append(make_tile(c, exts, i))
 
+        # Ref para actualizar el nombre mostrado tras renombrar
+        nombre_text = ft.Text(
+            nombre,
+            size=15,
+            weight=ft.FontWeight.W_600,
+            color="#E0E6ED",
+        )
+
+        def rename_perfil_from_editor(e):
+            """Busca el tile en la lista y abre el dialog de renombrar."""
+            nombre_buscado = perfil.replace("config_", "").replace(".json", "")
+            tile_title_found = None
+            perfil_ref_found = None  # la lista mutable de createProfileUI
+            for ctrl in profilesRef.current.controls[1].controls:
+                if isinstance(ctrl, ft.Container) and isinstance(ctrl.content, ft.ListTile):
+                    if ctrl.content.title.value == nombre_buscado:
+                        tile_title_found = ctrl.content.title
+                        perfil_ref_found = getattr(
+                            ctrl, "data", None)  # [filename]
+                        break
+
+            # Wrapper que actualiza:
+            #   1. el ft.Text del ListTile en la lista
+            #   2. el ft.Text del header del editor
+            #   3. perfil_ref[0] en createProfileUI (para que los lambdas usen el nuevo nombre)
+            class _TileProxy:
+                def __init__(self, real_tile, header_text, pref):
+                    self._real = real_tile
+                    self._header = header_text
+                    self._pref = pref  # lista [filename] de createProfileUI
+
+                @property
+                def value(self):
+                    return self._real.value if self._real else ""
+
+                @value.setter
+                def value(self, v):
+                    if self._real:
+                        self._real.value = v
+                    self._header.value = v
+                    # Actualiza el filename capturado por todos los lambdas del tile
+                    if self._pref is not None:
+                        self._pref[0] = f"config_{v}.json"
+
+                def update(self):
+                    if self._real:
+                        self._real.update()
+                    self._header.update()
+
+            proxy = _TileProxy(tile_title_found, nombre_text, perfil_ref_found)
+            dialogRenombrarPerfil(perfil, proxy)
+
         resultado = ft.Container(
             content=ft.Column(
                 [
@@ -816,12 +1025,7 @@ def main(page: ft.Page):
                                     size=16,
                                     color=ACCENT,
                                 ),
-                                ft.Text(
-                                    nombre,
-                                    size=15,
-                                    weight=ft.FontWeight.W_600,
-                                    color="#E0E6ED",
-                                ),
+                                nombre_text,
                                 ft.Container(expand=True),
                                 ft.IconButton(
                                     icon=ft.Icons.RESTART_ALT,
@@ -846,6 +1050,34 @@ def main(page: ft.Page):
                             vertical_alignment=ft.CrossAxisAlignment.CENTER,
                         ),
                         padding=ft.Padding(14, 10, 14, 6),
+                    ),
+                    # Botón renombrar
+                    ft.Container(
+                        content=ft.TextButton(
+                            content=ft.Row(
+                                controls=[
+                                    ft.Icon(
+                                        ft.Icons.DRIVE_FILE_RENAME_OUTLINE,
+                                        size=13,
+                                        color="#667788",
+                                    ),
+                                    ft.Text(
+                                        "Renombrar perfil",
+                                        size=11,
+                                        color="#667788",
+                                    ),
+                                ],
+                                spacing=4,
+                                tight=True,
+                            ),
+                            on_click=rename_perfil_from_editor,
+                            style=ft.ButtonStyle(
+                                padding=ft.Padding(0, 0, 0, 0),
+                                overlay_color=ft.Colors.with_opacity(
+                                    0.05, ft.Colors.BLUE),
+                            ),
+                        ),
+                        padding=ft.Padding(10, 0, 14, 4),
                     ),
                     # Nueva categoría
                     ft.Container(
@@ -1303,34 +1535,48 @@ def main(page: ft.Page):
             page.run_task(do_switch_to_preview)
 
     def createProfileUI(perfil):
-        return ft.Container(
+        # Referencia mutable: permite actualizar el nombre capturado por los lambdas tras un renombrado
+        perfil_ref = [perfil]
+        tile_title = ft.Text(
+            perfil.replace("config_", "").replace(".json", ""),
+            size=15,
+            weight=ft.FontWeight.W_500,
+        )
+        container = ft.Container(
+            data=perfil_ref,  # expuesto para que rename_perfil_from_editor pueda actualizarlo
             content=ft.ListTile(
-                title=ft.Text(
-                    perfil.replace("config_", "").replace(".json", ""),
-                    size=15,
-                    weight=ft.FontWeight.W_500,
-                ),
+                title=tile_title,
+                content_padding=ft.padding.only(
+                    left=8, right=0, top=0, bottom=0),
+                min_leading_width=0,
                 leading=ft.Container(
                     content=ft.Icon(
-                        ft.Icons.ACCOUNT_CIRCLE, color=ft.Colors.BLUE_400, size=28
+                        ft.Icons.ACCOUNT_CIRCLE, color=ft.Colors.BLUE_400, size=24
                     ),
                     bgcolor=ft.Colors.with_opacity(0.1, ft.Colors.BLUE),
-                    border_radius=25,
-                    width=45,
-                    height=45,
+                    border_radius=20,
+                    width=36,
+                    height=36,
                     alignment=ft.alignment.Alignment.CENTER,
                 ),
-                trailing=ft.Container(  # ✅ Envolver en Container
+                trailing=ft.Container(
                     content=ft.Row(
                         controls=[
+                            ft.IconButton(
+                                icon=ft.Icons.COPY,
+                                icon_size=18,
+                                icon_color=ft.Colors.BLUE_200,
+                                tooltip="Clonar perfil",
+                                on_click=lambda e: dialogClonarPerfil(
+                                    perfil_ref[0]),
+                            ),
                             ft.IconButton(
                                 icon=ft.Icons.EDIT,
                                 icon_size=18,
                                 icon_color=ft.Colors.WHITE,
                                 tooltip="Editar perfil",
-                                on_click=lambda e, p=perfil: tooglePreviewView(
-                                    e, p, True
-                                ),
+                                on_click=lambda e: tooglePreviewView(
+                                    e, perfil_ref[0], True),
                             ),
                             ft.IconButton(
                                 ref=deleteButtonRef,
@@ -1338,21 +1584,19 @@ def main(page: ft.Page):
                                 icon_size=18,
                                 icon_color=ft.Colors.RED_400,
                                 tooltip="Eliminar perfil",
-                                on_click=lambda e, p=perfil: dialogSeguroEliminarPerfil(
-                                    p
-                                ),
-
+                                on_click=lambda e: dialogSeguroEliminarPerfil(
+                                    perfil_ref[0]),
                             ),
                         ],
-                        spacing=0,  # ✅ Sin espacio entre botones
-                        tight=True,  # ✅ Compacto
+                        spacing=0,
+                        tight=True,
                     ),
                 ),
-                on_click=lambda e, p=perfil: onPerfilClick(e, p),
+                on_click=lambda e: onPerfilClick(e, perfil_ref[0]),
             ),
             bgcolor=ft.Colors.with_opacity(0.03, ft.Colors.GREY),
             border_radius=12,
-            padding=5,
+            padding=ft.padding.symmetric(horizontal=2, vertical=2),
             animate=ft.Animation(200, ft.AnimationCurve.EASE_OUT),
             ink=True,
             on_hover=lambda e: setattr(
@@ -1366,6 +1610,7 @@ def main(page: ft.Page):
             )
             or e.control.update(),
         )
+        return container
 
     def setupProfiles():
         perfiles = config.getProfiles()
@@ -1430,16 +1675,15 @@ def main(page: ft.Page):
             print("⚠️ Ya existe un perfil con ese nombre.")
             return
 
-        shutil.copy(
-            os.path.join(os.path.dirname(os.path.abspath(
-                __file__)), "config_Optimizador.json"),
-            os.path.join(config.RUTA_CONFIG, f"config_{nombre}.json"),
-        )
+        # Crear perfil vacío (no copia config_Optimizador.json)
+        with open(os.path.join(config.RUTA_CONFIG, f"config_{nombre}.json"), "w", encoding="utf-8") as _f:
+            json.dump({}, _f)
         profilesRef.current.controls[1].controls.append(
             createProfileUI(f"config_{nombre}.json")
         )
         contadorPerfilesRef.current.value = str(len(perfiles) + 1)
         contadorPerfilesRef.current.update()
+        profilesRef.current.update()
 
     def profilesUI():
         return ft.Card(

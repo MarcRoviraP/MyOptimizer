@@ -1,89 +1,183 @@
 {
   "Fotos": [
-    "jpg", "jpeg", "png", "gif", "bmp", "tiff", "tif", "webp",
-    "heic", "heif", "raw", "cr2", "nef", "arw", "dng", "orf", "sr2", "rw2"
+    "jpg",
+    "jpeg",
+    "png",
+    "gif",
+    "tiff",
+    "tif",
+    "webp",
+    "heic",
+    "raw",
+    "cr2",
+    "nef",
+    "arw",
+    "dng",
+    "orf",
+    "sr2",
+    "rw2"
   ],
-
   "Imagenes_Vectoriales": [
-    "svg", "ai", "eps", "cdr"
+    "svg",
+    "ai",
+    "eps",
+    "cdr"
   ],
-
   "Documentos_PDF": [
     "pdf"
   ],
-
   "Documentos_Word": [
-    "doc", "docx", "odt", "rtf", "wpd", "pages"
+    "doc",
+    "docx",
+    "odt",
+    "rtf",
+    "wpd",
+    "pages"
   ],
-
   "Hojas_de_Calculo": [
-    "xls", "xlsx", "xlsm", "ods", "csv", "numbers"
+    "xls",
+    "xlsx",
+    "xlsm",
+    "ods",
+    "csv",
+    "numbers"
   ],
-
   "Presentaciones": [
-    "ppt", "pptx", "pps", "ppsx", "odp", "key"
+    "ppt",
+    "pptx",
+    "pps",
+    "ppsx",
+    "odp",
+    "key"
   ],
-
   "Documentos_Texto_Plano": [
-    "txt", "md", "markdown", "tex"
+    "txt",
+    "md",
+    "markdown",
+    "tex"
   ],
-
   "Ebooks": [
-    "epub", "mobi", "azw", "azw3", "fb2"
+    "epub",
+    "mobi",
+    "azw",
+    "azw3",
+    "fb2"
   ],
-
   "Formularios_y_Datos": [
-    "xml", "json", "yaml", "yml", "xsd"
+    "xml",
+    "json",
+    "yaml",
+    "yml",
+    "xsd"
   ],
-
   "Programas": [
-    "exe", "msi", "bat", "cmd", "com",
-    "apk", "app", "deb", "rpm", "jar", "msix"
+    "exe",
+    "msi",
+    "bat",
+    "cmd",
+    "com",
+    "apk",
+    "app",
+    "deb",
+    "rpm",
+    "jar",
+    "msix"
   ],
-
   "Comprimidos": [
-    "zip", "rar", "7z", "tar", "gz", "bz2", "xz", "tgz", "iso"
+    "zip",
+    "rar",
+    "7z",
+    "tar",
+    "gz",
+    "bz2",
+    "xz",
+    "tgz",
+    "iso"
   ],
-
   "Videos": [
-    "mp4", "mkv", "avi", "mov", "wmv", "flv", "webm",
-    "mpeg", "mpg", "3gp", "m4v"
+    "mp4",
+    "mkv",
+    "avi",
+    "mov",
+    "wmv",
+    "flv",
+    "webm",
+    "mpeg",
+    "mpg",
+    "3gp",
+    "m4v"
   ],
-
   "Audio": [
-    "mp3", "wav", "aac", "flac", "ogg", "wma",
-    "m4a", "aiff", "mid", "midi"
+    "mp3",
+    "wav",
+    "aac",
+    "flac",
+    "ogg",
+    "wma",
+    "m4a",
+    "aiff",
+    "mid",
+    "midi"
   ],
-
   "Codigo": [
-    "java", "py", "js", "ts", "html", "css", "scss", "php",
-    "rb", "go", "rs", "c", "cpp", "h", "hpp",
-    "cs", "kt", "swift", "sql", "sh", "ps1"
+    "java",
+    "py",
+    "js",
+    "ts",
+    "html",
+    "css",
+    "scss",
+    "php",
+    "rb",
+    "go",
+    "rs",
+    "c",
+    "cpp",
+    "h",
+    "hpp",
+    "cs",
+    "kt",
+    "swift",
+    "sql",
+    "sh",
+    "ps1"
   ],
-
   "Bases_de_Datos": [
-    "db", "db3", "sqlite", "sqlite3", "mdb", "accdb"
+    "db",
+    "db3",
+    "sqlite",
+    "sqlite3",
+    "mdb",
+    "accdb"
   ],
-
   "Configuracion": [
-    "ini", "cfg", "conf", "env", "properties"
+    "ini",
+    "cfg",
+    "conf",
+    "env",
+    "properties"
   ],
-
   "Fuentes": [
-    "ttf", "otf", "woff", "woff2", "eot"
+    "ttf",
+    "otf",
+    "woff",
+    "woff2",
+    "eot"
   ],
-
   "Logs": [
     "log"
   ],
-
   "Temporales": [
-    "tmp", "temp", "bak", "old"
+    "tmp",
+    "temp",
+    "bak",
+    "old"
   ],
-
   "Accesos_Directos": [
-    "lnk", "url", "desktop"
+    "lnk",
+    "url",
+    "desktop"
   ],
-
-  "Otros": []
+  "Otros": [],
+  "dawdwa": []
 }
